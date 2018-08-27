@@ -3,11 +3,13 @@ package mx.com.bsmexico.customertool.api;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 
 public abstract class Desktop extends Region {
 	
 	MenuNavigator menu;
 	Pane workArea = new Pane();
+	Stage stage;
 	
 	
 	public Desktop(final MenuNavigator menu) {
@@ -44,5 +46,13 @@ public abstract class Desktop extends Region {
 	public abstract void loadWorkArea();
 	
 	protected abstract Node buildDesktop();
+
+	public void setStage(Stage primaryStage) {
+		this.stage = primaryStage;
+	}
+	
+	public Stage getStage(){
+		return this.stage;
+	}
 
 }

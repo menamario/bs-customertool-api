@@ -48,7 +48,7 @@ public abstract class MenuNavigator extends Region {
 	}
 	
 	public void show(){
-		getDesktop().showMenu();;
+		getDesktop().showMenu();
 	}
 	
 	protected abstract void render();
