@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<generalLayout xmlns="http://www.bsmexico.com.mx/generalLayout">
+	<fields>
+		<field>
+			<id>cta</id>
+			<title>Cuenta beneficiario</title>
+			<type>numeric</type>
+			<length>18</length>
+			<disable>false</disable>
+		</field>
+		<field>
+			<id>num-ln-mvl</id>
+			<title>Número de línea de telefonía Móvil del Beneficiario</title>
+			<type>numeric</type>
+			<length>10</length>
+			<disable>true</disable>
+		</field>
+		<field>
+			<id>bnk</id>
+			<title>Banco participante</title>
+			<type>string</type>
+			<length>3</length>
+			<disable>false</disable>
+		</field>
+		<field>
+			<id>t-cta</id>
+			<title>Banco participante</title>
+			<type>enum</type>
+			<length>2</length>
+			<disable>false</disable>
+			<restriction>
+				<enum>
+					<opt>00</opt>
+					<opt>40</opt>
+				</enum>
+			</restriction>
+		</field>
+		<field>
+			<id>moneda</id>
+			<title>Moneda</title>
+			<type>enum</type>
+			<length>3</length>
+			<disable>false</disable>
+			<restriction>
+				<enum>
+					<opt>MXN</opt>
+					<opt>USD</opt>
+					<opt>EUR</opt>
+				</enum>
+			</restriction>
+		</field>
+		<field>
+			<id>imp-max</id>
+			<title>Importe máximo a pagar</title>
+			<type>numeric</type>
+			<length>19</length>
+			<disable>false</disable>
+			<restriction>
+				<pattern>\d{1,19}\.\d{2}</pattern>
+			</restriction>
+		</field>
+		<field>
+			<id>t-persona</id>
+			<title>Tipo persona</title>
+			<type>enum</type>
+			<length>3</length>
+			<disable>false</disable>
+			<restriction>
+				<enum>
+					<opt>00</opt>
+					<opt>01</opt>
+				</enum>
+			</restriction>
+		</field>
+		<field>
+			<id>razon-social</id>
+			<title>Razón social</title>
+			<type>string</type>
+			<length>70</length>
+			<disable>false</disable>
+			<restriction>
+				<dependence>t-persona</dependence>
+			</restriction>
+		</field>
+		<field>
+			<id>nombre</id>
+			<title>Nombre</title>
+			<type>string</type>
+			<length>25</length>
+			<disable>false</disable>
+			<restriction>
+				<dependence>t-persona</dependence>
+			</restriction>
+		</field>
+		<field>
+			<id>apellido-paterno</id>
+			<title>Apellido paterno</title>
+			<type>string</type>
+			<length>30</length>
+			<disable>false</disable>
+			<restriction>
+				<dependence>t-persona</dependence>
+			</restriction>
+		</field>
+		<field>
+			<id>apellido-materno</id>
+			<title>Apellido materno</title>
+			<type>string</type>
+			<length>30</length>
+			<disable>false</disable>
+			<restriction>
+				<dependence>t-persona</dependence>
+			</restriction>
+		</field>
+	</fields>
+</generalLayout>

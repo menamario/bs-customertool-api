@@ -5,10 +5,6 @@ import java.net.URL;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
-import mx.com.bsmexico.customertool.api.NavRoute;
-
 /**
  * Layout contains all the information to be shown in the application. This
  * class are inmutable
