@@ -4,7 +4,12 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventType;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import mx.com.bsmexico.customertool.api.layouts.LayoutFactoryAbstract;
 import mx.com.bsmexico.customertool.api.layouts.LayoutModel;
@@ -56,6 +61,20 @@ public abstract class LayoutTable<T extends LayoutModel> extends Region {
 			this.table.setItems(data);
 			getChildren().add(this.table);
 			this.table.setEditable(true);
+			this.table.getSelectionModel().setCellSelectionEnabled(true);
+			
+			table.setOnKeyPressed(event -> {
+	            TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
+	            if (pos != null && (event.getCode().isLetterKey()||event.getCode().isDigitKey())) {
+	                table.edit(pos.getRow(), pos.getTableColumn());
+	            }
+	            if (event.getCode()==KeyCode.TAB){
+	            	table.requestFocus();
+	            	if (event.isShiftDown()) table.getSelectionModel().selectPrevious();
+	            	else table.getSelectionModel().selectNext();
+	            	
+	            }
+	        });
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			throw new InstantiationError(exception.getMessage());
@@ -72,7 +91,11 @@ public abstract class LayoutTable<T extends LayoutModel> extends Region {
 		if (layout != null) {
 			List<Field> fields = layout.getFields().getField();
 			for (Field f : fields) {
-				table.getColumns().add(columnFactory.getInstance(f, String.class, 100));
+				
+				 TableColumn ct = columnFactory.getInstance(f, String.class, 100);
+				 //TODO incluir en la configuracion de las columnas que porcentaje de la tabla debe ocupar
+	             ct.prefWidthProperty().bind(table.widthProperty().multiply(0.09090909090909090909));
+	             table.getColumns().add(ct);
 			}
 		}
 		return table;
