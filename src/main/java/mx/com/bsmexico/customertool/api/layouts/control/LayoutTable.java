@@ -70,9 +70,22 @@ public abstract class LayoutTable<T extends LayoutModel> extends Region {
 	            }
 	            if (event.getCode()==KeyCode.TAB){
 	            	table.requestFocus();
-	            	if (event.isShiftDown()) table.getSelectionModel().selectPrevious();
-	            	else table.getSelectionModel().selectNext();
+	            	if ((pos.getColumn()+1)==table.getColumns().size() 
+	            			&& (pos.getRow()+1)==table.getItems().size()){
+	            		addRow();
+	            	}
 	            	
+	            	KeyCode kc;
+	            	if (event.isShiftDown()) kc = KeyCode.LEFT;
+	            	else kc = KeyCode.RIGHT;
+	            	
+	            	KeyEvent ke = new KeyEvent(table, table, KeyEvent.KEY_PRESSED, "", "", kc, false,false,false,false);
+	            	table.fireEvent(ke);
+	            	
+	            	if ((pos.getColumn()+1)==table.getColumns().size()){
+					    table.getSelectionModel().selectNext();
+					    table.scrollToColumnIndex(0);
+			        }
 	            }
 	        });
 		} catch (Exception exception) {
@@ -94,7 +107,7 @@ public abstract class LayoutTable<T extends LayoutModel> extends Region {
 				
 				 TableColumn ct = columnFactory.getInstance(f, String.class, 100);
 				 //TODO incluir en la configuracion de las columnas que porcentaje de la tabla debe ocupar
-	             ct.prefWidthProperty().bind(table.widthProperty().multiply(0.09090909090909090909));
+	             ct.prefWidthProperty().bind(table.widthProperty().multiply(0.15));
 	             table.getColumns().add(ct);
 			}
 		}
@@ -102,4 +115,6 @@ public abstract class LayoutTable<T extends LayoutModel> extends Region {
 	}
 
 	protected abstract void polulate();
+	
+	protected abstract void addRow();
 }

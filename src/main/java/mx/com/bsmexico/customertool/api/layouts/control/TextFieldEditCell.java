@@ -175,17 +175,17 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				cancelEdit();
 				event.consume();
 			} else if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.TAB) {
-				getTableView().getSelectionModel().selectNext();
 				event.consume();
+	        	getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false,false,false,false));
 			} else if (event.getCode() == KeyCode.LEFT) {
-				getTableView().getSelectionModel().selectPrevious();
 				event.consume();
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false,false,false,false));
 			} else if (event.getCode() == KeyCode.UP) {
-				getTableView().getSelectionModel().selectAboveCell();
 				event.consume();
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false,false,false,false));
 			} else if (event.getCode() == KeyCode.DOWN) {
-				getTableView().getSelectionModel().selectBelowCell();
 				event.consume();
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false,false,false,false));
 			}
 		});
 
