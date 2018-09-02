@@ -8,6 +8,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 
 /**
@@ -58,17 +59,46 @@ public abstract class LayoutTable<T> extends Region {
 		table.getSelectionModel().cellSelectionEnabledProperty().set(true);
 		// when character or numbers pressed it will start edit in editable
 		// fields
-		table.setOnKeyPressed(event -> {
-			if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
-				editFocusedCell();
-			} else if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.TAB) {
-				table.getSelectionModel().selectNext();
-				event.consume();
-			} else if (event.getCode() == KeyCode.LEFT) {
-				selectPrevious();
-				event.consume();
-			}
-		});
+		
+        table.setOnKeyPressed(event -> {
+            TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
+            if (pos != null && (event.getCode().isLetterKey()||event.getCode().isDigitKey())) {
+                table.edit(pos.getRow(), pos.getTableColumn());
+            }
+            if (event.getCode()==KeyCode.TAB){
+                table.requestFocus();
+                if ((pos.getColumn()+1)==table.getColumns().size() 
+                        && (pos.getRow()+1)==table.getItems().size()){
+                    addRow();
+                }
+                
+                KeyCode kc;
+                if (event.isShiftDown()) kc = KeyCode.LEFT;
+                else kc = KeyCode.RIGHT;
+                
+                KeyEvent ke = new KeyEvent(table, table, KeyEvent.KEY_PRESSED, "", "", kc, false,false,false,false);
+                table.fireEvent(ke);
+                
+                if ((pos.getColumn()+1)==table.getColumns().size()){
+                    table.getSelectionModel().selectNext();
+                    table.scrollToColumnIndex(0);
+                }
+            }
+        });
+
+		
+		
+//		table.setOnKeyPressed(event -> {
+//			if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
+//				editFocusedCell();
+//			} else if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.TAB) {
+//				table.getSelectionModel().selectNext();
+//				event.consume();
+//			} else if (event.getCode() == KeyCode.LEFT) {
+//				selectPrevious();
+//				event.consume();
+//			}
+//		});
 	}
 
 	/**
