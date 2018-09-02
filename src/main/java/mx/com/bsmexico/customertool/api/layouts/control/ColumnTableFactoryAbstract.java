@@ -58,7 +58,7 @@ public abstract class ColumnTableFactoryAbstract<S> {
 		final Predicate<T> restiction = metamodel.getRestriction(fieldName);
 		final Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory = new Callback<TableColumn<S, T>, TableCell<S, T>>() {
 			public TableCell<S, T> call(TableColumn<S, T> p) {
-				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(converter, restiction);
+				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(converter, restiction, metamodel.getClassFieldName(fieldName));
 				if(metamodel.isDisabled(fieldName)) {
 					cell.setDisable(true);
 				}

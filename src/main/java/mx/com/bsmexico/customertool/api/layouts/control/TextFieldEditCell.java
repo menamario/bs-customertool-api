@@ -1,5 +1,8 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import javafx.beans.value.ChangeListener;
@@ -29,21 +32,24 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	private boolean escapePressed = false;
 	private TablePosition<S, ?> tablePos = null;
 	private Predicate<T> restriction;
+	private String fieldName = null;
+
 	/**
 	 * @param converter
 	 */
-	public TextFieldEditCell(final StringConverter<T> converter) {		
+	public TextFieldEditCell(final StringConverter<T> converter) {
 		super(converter);
 	}
-	
+
 	/**
 	 * @param converter
 	 */
-	public TextFieldEditCell(final StringConverter<T> converter, Predicate<T> restriction) {		
+	public TextFieldEditCell(final StringConverter<T> converter, Predicate<T> restriction, String fieldName) {
 		super(converter);
 		this.restriction = restriction;
-		//this.setStyle("-fx-border-color: red");
-		//this.setStyle("");
+		this.fieldName = fieldName;
+		// 
+		// this.setStyle("");
 	}
 
 	/*
@@ -85,12 +91,13 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 		// we need to setEditing(false):
 		super.cancelEdit(); // this fires an invalid EditCancelEvent.
 		// update the item within this cell, so that it represents the new value
-		updateItem(newValue, false);
+
 		if (table != null) {
 			// reset the editing cell on the TableView
 			table.edit(-1, null);
 		}
 		evaluateRestriction(newValue);
+		updateItem(newValue, false);
 	}
 
 	/** {@inheritDoc} */
@@ -112,20 +119,41 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 
 	/** {@inheritDoc} */
 	@Override
-	public void updateItem(T item, boolean empty) {		
+	public void updateItem(T item, boolean empty) {
 		super.updateItem(item, empty);
-		updateItem();		
+		updateItem();
 	}
-	
+
 	/**
 	 * @param item
 	 */
 	private void evaluateRestriction(T item) {
-		if(restriction != null) {
-			if(restriction.test(item)) {
-				System.out.println("Restriction Good");
-			}else {
-				System.out.println("Restriction Bad");
+		if (restriction != null) {
+			TableView<S> table = getTableView();
+			S registro = (S) table.getItems().get(tablePos.getRow());
+			Method method = null;
+			try {
+				method = registro.getClass().getDeclaredMethod("setEstatus", String.class,
+						Boolean.class);
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				method.invoke(registro, fieldName, restriction.test(item));
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
@@ -182,16 +210,20 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				event.consume();
 			} else if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.TAB) {
 				event.consume();
-	        	getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false,false,false,false));
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
+						KeyCode.TAB, false, false, false, false));
 			} else if (event.getCode() == KeyCode.LEFT) {
 				event.consume();
-				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false,false,false,false));
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
+						KeyCode.LEFT, false, false, false, false));
 			} else if (event.getCode() == KeyCode.UP) {
 				event.consume();
-				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false,false,false,false));
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
+						KeyCode.UP, false, false, false, false));
 			} else if (event.getCode() == KeyCode.DOWN) {
 				event.consume();
-				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false,false,false,false));
+				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
+						KeyCode.DOWN, false, false, false, false));
 			}
 		});
 
@@ -210,13 +242,40 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	 * 
 	 */
 	private void updateItem() {
+		this.getStyleClass().remove("invalid");
+		S registro = (S) this.getTableRow().getItem();
+		if (registro != null) {
+			try {
+				final Method method = registro.getClass().getDeclaredMethod("getEstatus");
+				Map<String, Boolean> map = (Map<String, Boolean>) method.invoke(registro);
+				if (map.get(fieldName).equals(Boolean.FALSE)) {
+					this.getStyleClass().add("invalid");
+				}
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		if (isEmpty()) {
 			setText(null);
 			setGraphic(null);
 		} else {
 			if (isEditing()) {
 				if (textField != null) {
-					textField.setText(getItemText());					
+					textField.setText(getItemText());
 				}
 				setText(null);
 				setGraphic(textField);
@@ -224,7 +283,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				setText(getItemText());
 				setGraphic(null);
 			}
-		}		
+		}
 	}
 
 	/**
