@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import mx.com.bsmexico.customertool.api.bind.JaxbBinding;
-import mx.com.bsmexico.customertool.api.layouts.bind.GeneralLayoutBinding;
-import mx.com.bsmexico.customertool.api.layouts.model.Layout;
 import primer.po.PurchaseOrderType;
 import primer.po.USAddress;
 
@@ -44,21 +42,4 @@ public class BindingTest {
 			Assert.fail(e.getMessage());
 		}
 	}
-
-	@Test
-	public void GeneralLayoutBindingTest() {
-		final ClassLoader classLoader = getClass().getClassLoader();
-		try {
-			final GeneralLayoutBinding binding = new GeneralLayoutBinding();
-			final File file = new File(classLoader.getResource("xml/layouts/beneficiariosLayout.xml").getFile());
-			Layout layout = binding.unmarshall(new FileInputStream(file));
-			Assert.assertNotNull(layout);
-			Assert.assertTrue(layout.getFields().getField().size() == 11);
-			binding.marshall(layout, System.out);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			Assert.fail(e1.getMessage());
-		}
-	}
-
 }

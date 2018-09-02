@@ -1,6 +1,9 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,18 +15,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DefaultStringConverter;
-import mx.com.bsmexico.customertool.api.layouts.LayoutFieldModel;
-import mx.com.bsmexico.customertool.api.layouts.LayoutModel;
-import mx.com.bsmexico.customertool.api.layouts.model.Field;
+import mx.com.bsmexico.customertool.api.layouts.modell.LayoutMetaModel;
 
 /**
  * @author jchr
  *
  * @param <S>
  */
-public abstract class ColumnTableFactoryAbstract<S extends LayoutModel> {
+public abstract class ColumnTableFactoryAbstract<S> {
 	private Class<S> type;
-	private java.lang.reflect.Field[] classFields;
+	private LayoutMetaModel<S> metamodel;
 
 	/**
 	 * @param type
@@ -34,9 +35,9 @@ public abstract class ColumnTableFactoryAbstract<S extends LayoutModel> {
 			throw new IllegalArgumentException("Type can not be null");
 		}
 		this.type = type;
+		metamodel = new LayoutMetaModel<S>(type);
 	}
 
-	
 	/**
 	 * @param field
 	 * @param typeContentClass
@@ -45,70 +46,54 @@ public abstract class ColumnTableFactoryAbstract<S extends LayoutModel> {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> TableColumn<S, T> getInstance(final Field field, final Class<T> typeContentClass, final StringConverter<T> converter, final int width)
-			throws Exception {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> TableColumn<S, T> getInstance(final String fieldName, final int width) throws Exception {
 
-		final TableColumn<S, T> column = new TableColumn<>(field.getTitle());
-		final StringConverter<T> finalConverter = (converter == null) ? (StringConverter<T>) new DefaultStringConverter() : converter;
-		column.setMinWidth(width);
-		final java.lang.reflect.Field property = this.getProperty(field.getId());
+		final TableColumn<S, T> column = new TableColumn<>(metamodel.getTitle(fieldName));
+		column.setId(fieldName);
+		final StringConverter converter = (metamodel.getConverter(fieldName) == null)
+				? (StringConverter) new DefaultStringConverter()
+				: metamodel.getConverter(fieldName);
+		column.setPrefWidth(width);
+		final Predicate<T> restiction = metamodel.getRestriction(fieldName);
 		final Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory = new Callback<TableColumn<S, T>, TableCell<S, T>>() {
 			public TableCell<S, T> call(TableColumn<S, T> p) {
-				return new TextFieldEditCell<S, T>(finalConverter);
+				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(converter, restiction);
+				if(metamodel.isDisabled(fieldName)) {
+					cell.setDisable(true);
+				}
+				return cell;
 			}
 		};
-		column.setCellValueFactory(new PropertyValueFactory<S, T>(property.getName()));
+		column.setCellValueFactory(new PropertyValueFactory<S, T>(metamodel.getClassFieldName(fieldName)));
 		column.setCellFactory(cellFactory);
 		column.setOnEditCommit(new EventHandler<CellEditEvent<S, T>>() {
 			@Override
-			public void handle(CellEditEvent<S, T> t) {
-				S row = ((S) t.getTableView().getItems().get(t.getTablePosition().getRow()));
-				try {
-					Method method = type.getDeclaredMethod("set" + StringUtils.capitalize(property.getName()),
-							typeContentClass);
-					method.invoke(row, t.getNewValue());
-				} catch (Exception exception) {
-					exception.printStackTrace();
+			public void handle(CellEditEvent<S, T> t) {				
+				final S row = ((S) t.getTableView().getItems().get(t.getTablePosition().getRow()));				
+				final T value = (t.getNewValue() == null) ? t.getOldValue() : t.getNewValue();
+				if (value != null) {
+					try {
+						final Method method = type.getDeclaredMethod(
+								"set" + StringUtils.capitalize(metamodel.getClassFieldName(fieldName)),
+								(metamodel.getWrapperClass(fieldName) == null) ? String.class
+										: metamodel.getWrapperClass(fieldName));
+						method.invoke(row, value);
+					} catch (Exception exception) {
+						exception.printStackTrace();
+					}
 				}
+				t.getTableView().refresh();
 			}
 		});
 		return column;
 	}
-	
-	/**
-	 * @param field
-	 * @param typeContentClass
-	 * @param width
-	 * @return
-	 * @throws Exception
-	 */
-	public <T> TableColumn<S, T> getInstance(final Field field, final Class<T> typeContentClass, final int width)
-			throws Exception {
-		return this.getInstance(field, typeContentClass,null, width);
-	}
 
 	/**
-	 * @param field
 	 * @return
 	 */
-	/**
-	 * @param field
-	 * @return
-	 */
-	private java.lang.reflect.Field getProperty(String field) {
-		java.lang.reflect.Field property = null;
-		if (classFields == null) {
-			classFields = type.getDeclaredFields();
-		}
-
-		for (java.lang.reflect.Field cf : classFields) {
-			LayoutFieldModel annotation = cf.getDeclaredAnnotation(LayoutFieldModel.class);
-			if (annotation != null && annotation.field().equals(field)) {
-				property = cf;
-				break;
-			}
-		}
-		return property;
+	public Set<String> getFieldIds() {
+		return (this.metamodel == null) ? new HashSet<>() : this.metamodel.getFieldNames();
 	}
+
 }

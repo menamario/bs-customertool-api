@@ -1,11 +1,12 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
+import java.util.function.Predicate;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
@@ -14,9 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
-import javafx.util.converter.DefaultStringConverter;
 
 /**
  * @author jchr
@@ -29,29 +28,22 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	private TextField textField;
 	private boolean escapePressed = false;
 	private TablePosition<S, ?> tablePos = null;
-
+	private Predicate<T> restriction;
 	/**
 	 * @param converter
 	 */
-	public TextFieldEditCell(final StringConverter<T> converter) {
-		
+	public TextFieldEditCell(final StringConverter<T> converter) {		
 		super(converter);
-	}	
-
-	/**
-	 * @return
-	 */
-	public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> forTableColumn() {
-		return forTableColumn(new DefaultStringConverter());
 	}
-
+	
 	/**
 	 * @param converter
-	 * @return
 	 */
-	public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(
-			final StringConverter<T> converter) {
-		return list -> new TextFieldEditCell<S, T>(converter);
+	public TextFieldEditCell(final StringConverter<T> converter, Predicate<T> restriction) {		
+		super(converter);
+		this.restriction = restriction;
+		//this.setStyle("-fx-border-color: red");
+		//this.setStyle("");
 	}
 
 	/*
@@ -98,6 +90,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 			// reset the editing cell on the TableView
 			table.edit(-1, null);
 		}
+		evaluateRestriction(newValue);
 	}
 
 	/** {@inheritDoc} */
@@ -119,9 +112,22 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 
 	/** {@inheritDoc} */
 	@Override
-	public void updateItem(T item, boolean empty) {
+	public void updateItem(T item, boolean empty) {		
 		super.updateItem(item, empty);
-		updateItem();
+		updateItem();		
+	}
+	
+	/**
+	 * @param item
+	 */
+	private void evaluateRestriction(T item) {
+		if(restriction != null) {
+			if(restriction.test(item)) {
+				System.out.println("Restriction Good");
+			}else {
+				System.out.println("Restriction Bad");
+			}
+		}
 	}
 
 	/**
@@ -210,7 +216,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 		} else {
 			if (isEditing()) {
 				if (textField != null) {
-					textField.setText(getItemText());
+					textField.setText(getItemText());					
 				}
 				setText(null);
 				setGraphic(textField);
@@ -218,7 +224,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				setText(getItemText());
 				setGraphic(null);
 			}
-		}
+		}		
 	}
 
 	/**
