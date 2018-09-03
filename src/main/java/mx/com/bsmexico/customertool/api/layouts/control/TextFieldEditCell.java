@@ -2,7 +2,9 @@ package mx.com.bsmexico.customertool.api.layouts.control;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javafx.beans.value.ChangeListener;
@@ -33,6 +35,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	private TablePosition<S, ?> tablePos = null;
 	private Predicate<T> restriction;
 	private String fieldName = null;
+	private List<String> fields;
 
 	/**
 	 * @param converter
@@ -44,10 +47,11 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	/**
 	 * @param converter
 	 */
-	public TextFieldEditCell(final StringConverter<T> converter, Predicate<T> restriction, String fieldName) {
+	public TextFieldEditCell(final StringConverter<T> converter, Predicate<T> restriction, String fieldName, List<String> fields) {
 		super(converter);
 		this.restriction = restriction;
 		this.fieldName = fieldName;
+		this.fields = fields;
 		// 
 		// this.setStyle("");
 	}
@@ -96,7 +100,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 			// reset the editing cell on the TableView
 			table.edit(-1, null);
 		}
-		evaluateRestriction(newValue);
+		//evaluateRestriction(newValue);
 		updateItem(newValue, false);
 	}
 
@@ -131,6 +135,10 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 		if (restriction != null) {
 			TableView<S> table = getTableView();
 			S registro = (S) table.getItems().get(tablePos.getRow());
+			
+			
+			
+			
 			Method method = null;
 			try {
 				method = registro.getClass().getDeclaredMethod("setEstatus", String.class,
@@ -139,6 +147,34 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			Method m = null;
+			try {
+				m = registro.getClass().getDeclaredMethod("getInvalids");
+			} catch (NoSuchMethodException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			List<String> listaInvalidos;
+			try {
+				listaInvalidos = (List<String>) m.invoke(registro);
+				for(String s: listaInvalidos){
+					method.invoke(registro, s, false);
+					fields.remove(s);
+				}
+				for(String s: fields){
+					method.invoke(registro, s, true);
+				}
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -155,6 +191,8 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+
 		}
 	}
 
@@ -208,11 +246,11 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				textField.setText(getConverter().toString(getItem()));
 				cancelEdit();
 				event.consume();
-			} else if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.TAB) {
+			} else if (/*event.getCode() == KeyCode.RIGHT ||*/ event.getCode() == KeyCode.TAB) {
 				event.consume();
 				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
 						KeyCode.TAB, false, false, false, false));
-			} else if (event.getCode() == KeyCode.LEFT) {
+			}/* else if (event.getCode() == KeyCode.LEFT) {
 				event.consume();
 				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
 						KeyCode.LEFT, false, false, false, false));
@@ -224,7 +262,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				event.consume();
 				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
 						KeyCode.DOWN, false, false, false, false));
-			}
+			}*/
 		});
 
 		return textField;
