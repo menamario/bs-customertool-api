@@ -3,7 +3,6 @@ package mx.com.bsmexico.layoutstool.test.api;
 import java.io.File;
 import java.util.List;
 
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +17,7 @@ public class ImporterTest {
 	public void exporterTest() {
 		final ClassLoader classLoader = getClass().getClassLoader();
 		final File file = new File(classLoader.getResource("plain/Libro6.csv").getFile());
-		
+
 		final ImportTarget<Beneficiario> target = new ImportTarget<Beneficiario>() {
 
 			@Override
@@ -31,10 +30,10 @@ public class ImporterTest {
 				Assert.assertTrue("MXN".equals(data.get(0).getMoneda()));
 				Assert.assertTrue("55000".equals(data.get(0).getImporteMaximo()));
 				Assert.assertTrue("00".equals(data.get(0).getTipoPersona()));
-				Assert.assertTrue(StringUtils.isBlank(data.get(0).getRazonSocial()));				
+				Assert.assertTrue(StringUtils.isBlank(data.get(0).getRazonSocial()));
 				Assert.assertTrue("Mario".equals(data.get(0).getNombre()));
 				Assert.assertTrue("Mena".equals(data.get(0).getApellidoMaterno()));
-				Assert.assertTrue("Cruz".equals(data.get(0).getApellidoPaterno()));				
+				Assert.assertTrue("Cruz".equals(data.get(0).getApellidoPaterno()));
 			}
 
 		};
@@ -42,7 +41,7 @@ public class ImporterTest {
 		final CSVImporter<Beneficiario> importer = new CSVImporter<Beneficiario>(target) {
 
 			@Override
-			protected Beneficiario getInstance(CSVRecord record) {
+			protected Beneficiario getInstance(List<String> record) {
 				final Beneficiario beneficiario = new Beneficiario();
 				beneficiario.setCuenta(record.get(0));
 				beneficiario.setNumLinea(record.get(1));
@@ -63,7 +62,7 @@ public class ImporterTest {
 				return null;
 			}
 		};
-		
+
 		try {
 			importer.importFile(file);
 		} catch (Exception e) {
