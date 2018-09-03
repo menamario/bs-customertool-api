@@ -1,7 +1,6 @@
 package mx.com.bsmexico.customertool.api.exporter;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * @author jchr
@@ -9,5 +8,5 @@ import java.util.List;
  */
 public interface Exporter<T> {
 
-	void export(List<T> records, File file) throws Exception;
+	void export(File file) throws Exception;
 }
