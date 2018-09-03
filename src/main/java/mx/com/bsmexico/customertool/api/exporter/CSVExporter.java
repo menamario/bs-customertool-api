@@ -1,11 +1,10 @@
-package mx.com.bsmexico.customertool.api.layouts;
+package mx.com.bsmexico.customertool.api.exporter;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -17,7 +16,6 @@ import org.apache.commons.csv.CSVPrinter;
  * @param <T>
  */
 public abstract class CSVExporter <T> implements Exporter<T>{
-	final SimpleDateFormat fd = new SimpleDateFormat("YYYY-MM-dd:HH:mm:ss");
 	/* (non-Javadoc)
 	 * @see mx.com.bsmexico.layoutstool.core.api.layouts.Exporter#export()
 	 */

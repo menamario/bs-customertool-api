@@ -174,6 +174,10 @@ public abstract class LayoutTable<T> extends Region {
 		return this.table;
 	}
 
+	protected String[] getFieldOrder() {
+		return columnFactory.getFieldIds().toArray(new String[0]);
+	}
+	
 	protected abstract void polulate();
 
 	protected abstract void addRow();

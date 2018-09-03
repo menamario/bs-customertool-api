@@ -53,7 +53,7 @@ public class LayoutMetaModel<T> {
 	/**
 	 * 
 	 */
-	private void init() {
+	private void init() {		
 		setMetadataFields();
 		setMetadataRestrictions();
 	}
@@ -151,7 +151,7 @@ public class LayoutMetaModel<T> {
 	/**
 	 * @return
 	 */
-	public Set<String> getFieldNames() {
+	public Set<String> getFieldNames() {		
 		return (this.metamodel == null) ? new HashSet<>() : this.metamodel.keySet();
 	}
 
