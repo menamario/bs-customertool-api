@@ -154,6 +154,15 @@ public class LayoutMetaModel<T> {
 	public Set<String> getFieldNames() {		
 		return (this.metamodel == null) ? new HashSet<>() : this.metamodel.keySet();
 	}
+	
+	public List<String> getFieldIds() {
+		List<String> fieldIds = new ArrayList<String>();
+		for(String s: this.metamodel.keySet()){
+			fieldIds.add(this.getClassFieldName(s));
+		}
+		return fieldIds;
+	}
+
 
 	/**
 	 * @param fieldName
@@ -218,6 +227,11 @@ public class LayoutMetaModel<T> {
 	public String getClassFieldName(final String fieldName) {
 		return (metamodel.get(fieldName) == null) ? null
 				: metamodel.get(fieldName).get(METAMODEL_CLASS_FIELD).toString();
+	}
+	
+	public String getRestrictionDesc(final String fieldName) {
+		return (metamodel.get(fieldName) == null) ? null
+				: metamodel.get(fieldName).get(METAMODEL_RESTRICTION_DESC).toString();
 	}
 
 	/**

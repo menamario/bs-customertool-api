@@ -8,9 +8,11 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
 import javafx.event.EventHandler;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -50,6 +52,10 @@ public abstract class ColumnTableFactoryAbstract<S> {
 	public <T> TableColumn<S, T> getInstance(final String fieldName, final int width) throws Exception {
 
 		final TableColumn<S, T> column = new TableColumn<>(metamodel.getTitle(fieldName));
+//		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
+//	    firstNameLabel.setTooltip(new Tooltip(metamodel.getRestrictionDesc(fieldName)));
+//	    column.setGraphic(firstNameLabel);
+		
 		column.setId(fieldName);
 		final StringConverter converter = (metamodel.getConverter(fieldName) == null)
 				? (StringConverter) new DefaultStringConverter()
@@ -58,7 +64,7 @@ public abstract class ColumnTableFactoryAbstract<S> {
 		final Predicate<T> restiction = metamodel.getRestriction(fieldName);
 		final Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory = new Callback<TableColumn<S, T>, TableCell<S, T>>() {
 			public TableCell<S, T> call(TableColumn<S, T> p) {
-				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(converter, restiction, metamodel.getClassFieldName(fieldName));
+				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(converter, restiction, metamodel.getClassFieldName(fieldName), metamodel.getFieldIds());
 				if(metamodel.isDisabled(fieldName)) {
 					cell.setDisable(true);
 				}
