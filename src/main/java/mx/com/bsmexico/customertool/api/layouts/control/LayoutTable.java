@@ -1,6 +1,6 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
-import java.util.Set;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -159,8 +159,8 @@ public abstract class LayoutTable<T> extends Region {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void setColumns() throws Exception {
-		Set<String> ids = this.columnFactory.getFieldIds();
-		if (!ids.isEmpty()) {
+		String[] ids = getFieldOrder();//this.columnFactory.getFieldIds();  
+		if (!ArrayUtils.isEmpty(ids)) {
 			TableColumn ct = null;
 			for (String id : ids) {
 				ct = columnFactory.getInstance(id, 100);
