@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import javafx.beans.value.ChangeListener;
@@ -17,6 +16,7 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -286,8 +286,12 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 			try {
 				final Method method = registro.getClass().getDeclaredMethod("getEstatus");
 				Map<String, Boolean> map = (Map<String, Boolean>) method.invoke(registro);
+				
+				final Method mt = registro.getClass().getDeclaredMethod("getTooltip", String.class);
+				String tooltip = (String) mt.invoke(registro,fieldName);
 				if (map.get(fieldName).equals(Boolean.FALSE)) {
 					this.getStyleClass().add("invalid");
+					if (tooltip!=null)this.setTooltip(new Tooltip(tooltip));
 				}
 			} catch (NoSuchMethodException e) {
 				// TODO Auto-generated catch block

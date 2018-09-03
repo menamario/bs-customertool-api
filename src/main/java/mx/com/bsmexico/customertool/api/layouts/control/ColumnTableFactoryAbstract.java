@@ -51,10 +51,11 @@ public abstract class ColumnTableFactoryAbstract<S> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> TableColumn<S, T> getInstance(final String fieldName, final int width) throws Exception {
 
-		final TableColumn<S, T> column = new TableColumn<>(metamodel.getTitle(fieldName));
-//		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
-//	    firstNameLabel.setTooltip(new Tooltip(metamodel.getRestrictionDesc(fieldName)));
-//	    column.setGraphic(firstNameLabel);
+		final TableColumn<S, T> column = new TableColumn<>();
+		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
+		if (metamodel.getRestrictionDesc(fieldName)!=null)
+			firstNameLabel.setTooltip(new Tooltip(metamodel.getRestrictionDesc(fieldName)));
+	    column.setGraphic(firstNameLabel);
 		
 		column.setId(fieldName);
 		final StringConverter converter = (metamodel.getConverter(fieldName) == null)

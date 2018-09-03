@@ -60,27 +60,27 @@ public class LayoutModelTest {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	@Test
-	public void factoryColumnTest() {
-		final ColumnTableFactoryAbstract<ModelTest> factory = new ColumnTableFactoryAbstract<ModelTest>(
-				ModelTest.class) {
-		};
-		final Set<String> ids = factory.getFieldIds();
-		Assert.assertTrue(ids.size() == 2);
-		TableColumn tc = null;
-		for (String id : ids) {
-			try {
-				tc = factory.getInstance(id, 100);
-				Assert.assertNotNull(tc);
-				Assert.assertNotNull(tc.getOnEditCommit());
-				Assert.assertNotNull(tc.getCellFactory());
-				Assert.assertNotNull(tc.getCellValueFactory());
-				Assert.assertTrue(tc.getId().equals(id));
-			} catch (Exception e) {
-				Assert.fail(e.getMessage());
-			}
-		}
-
-	}
+//	@SuppressWarnings("rawtypes")
+//	@Test
+//	public void factoryColumnTest() {
+//		final ColumnTableFactoryAbstract<ModelTest> factory = new ColumnTableFactoryAbstract<ModelTest>(
+//				ModelTest.class) {
+//		};
+//		final Set<String> ids = factory.getFieldIds();
+//		Assert.assertTrue(ids.size() == 2);
+//		TableColumn tc = null;
+//		for (String id : ids) {
+//			try {
+//				tc = factory.getInstance(id, 100);
+//				Assert.assertNotNull(tc);
+//				Assert.assertNotNull(tc.getOnEditCommit());
+//				Assert.assertNotNull(tc.getCellFactory());
+//				Assert.assertNotNull(tc.getCellValueFactory());
+//				Assert.assertTrue(tc.getId().equals(id));
+//			} catch (Exception e) {
+//				Assert.fail(e.getMessage());
+//			}
+//		}
+//
+//	}
 }

@@ -231,7 +231,7 @@ public class LayoutMetaModel<T> {
 	
 	public String getRestrictionDesc(final String fieldName) {
 		return (metamodel.get(fieldName) == null) ? null
-				: metamodel.get(fieldName).get(METAMODEL_RESTRICTION_DESC).toString();
+				: metamodel.get(fieldName).get(METAMODEL_RESTRICTION_DESC) == null ? null :metamodel.get(fieldName).get(METAMODEL_RESTRICTION_DESC).toString();
 	}
 
 	/**
