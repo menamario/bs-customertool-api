@@ -68,6 +68,7 @@ public abstract class ColumnTableFactoryAbstract<S> {
 				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(converter, restiction, metamodel.getClassFieldName(fieldName), metamodel.getFieldIds());
 				if(metamodel.isDisabled(fieldName)) {
 					cell.setDisable(true);
+					cell.setStyle("-fx-background-color: gray;");
 				}
 				return cell;
 			}
