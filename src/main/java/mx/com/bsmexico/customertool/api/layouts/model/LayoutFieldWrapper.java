@@ -1,4 +1,4 @@
-package mx.com.bsmexico.customertool.api.layouts.modell;
+package mx.com.bsmexico.customertool.api.layouts.model;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

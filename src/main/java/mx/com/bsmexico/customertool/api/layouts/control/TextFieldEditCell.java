@@ -1,11 +1,5 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -16,11 +10,11 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
+import mx.com.bsmexico.customertool.api.layouts.model.validation.LayoutModelValidator;
 
 /**
  * @author jchr
@@ -33,27 +27,23 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	private TextField textField;
 	private boolean escapePressed = false;
 	private TablePosition<S, ?> tablePos = null;
-	private Predicate<T> restriction;
-	private String fieldName = null;
-	private List<String> fields;
+	private LayoutModelValidator<S> validator;
+	private String fieldName;
+	private int maxLength;
 
 	/**
 	 * @param converter
 	 */
-	public TextFieldEditCell(final StringConverter<T> converter) {
-		super(converter);
+	public TextFieldEditCell(final String field) {
+		super();
 	}
 
 	/**
 	 * @param converter
 	 */
-	public TextFieldEditCell(final StringConverter<T> converter, Predicate<T> restriction, String fieldName, List<String> fields) {
+	public TextFieldEditCell(final String field, final StringConverter<T> converter) {
 		super(converter);
-		this.restriction = restriction;
-		this.fieldName = fieldName;
-		this.fields = fields;
-		// 
-		// this.setStyle("");
+		this.fieldName = field;
 	}
 
 	/*
@@ -100,7 +90,6 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 			// reset the editing cell on the TableView
 			table.edit(-1, null);
 		}
-		//evaluateRestriction(newValue);
 		updateItem(newValue, false);
 	}
 
@@ -129,71 +118,17 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	}
 
 	/**
-	 * @param item
+	 * @param validator
 	 */
-	private void evaluateRestriction(T item) {
-		if (restriction != null) {
-			TableView<S> table = getTableView();
-			S registro = (S) table.getItems().get(tablePos.getRow());
-			
-			
-			
-			
-			Method method = null;
-			try {
-				method = registro.getClass().getDeclaredMethod("setEstatus", String.class,
-						Boolean.class);
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			Method m = null;
-			try {
-				m = registro.getClass().getDeclaredMethod("getInvalids");
-			} catch (NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			List<String> listaInvalidos;
-			try {
-				listaInvalidos = (List<String>) m.invoke(registro);
-				for(String s: listaInvalidos){
-					method.invoke(registro, s, false);
-					fields.remove(s);
-				}
-				for(String s: fields){
-					method.invoke(registro, s, true);
-				}
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				method.invoke(registro, fieldName, restriction.test(item));
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+	public void setValidator(final LayoutModelValidator<S> validator) {
+		this.validator = validator;
+	}
 
-		}
+	/**
+	 * @param maxLength
+	 */
+	public void setmaxLength(final int maxLength) {
+		this.maxLength = maxLength;
 	}
 
 	/**
@@ -246,24 +181,35 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				textField.setText(getConverter().toString(getItem()));
 				cancelEdit();
 				event.consume();
-			} else if (/*event.getCode() == KeyCode.RIGHT ||*/ event.getCode() == KeyCode.TAB) {
+			} else if (/* event.getCode() == KeyCode.RIGHT || */ event.getCode() == KeyCode.TAB) {
 				event.consume();
 				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
 						KeyCode.TAB, false, false, false, false));
-			}/* else if (event.getCode() == KeyCode.LEFT) {
-				event.consume();
-				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
-						KeyCode.LEFT, false, false, false, false));
-			} else if (event.getCode() == KeyCode.UP) {
-				event.consume();
-				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
-						KeyCode.UP, false, false, false, false));
-			} else if (event.getCode() == KeyCode.DOWN) {
-				event.consume();
-				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
-						KeyCode.DOWN, false, false, false, false));
-			}*/
+			} /*
+				 * else if (event.getCode() == KeyCode.LEFT) { event.consume();
+				 * getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(),
+				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false)); }
+				 * else if (event.getCode() == KeyCode.UP) { event.consume();
+				 * getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(),
+				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false)); }
+				 * else if (event.getCode() == KeyCode.DOWN) { event.consume();
+				 * getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(),
+				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false, false, false, false)); }
+				 */
 		});
+
+		if (this.maxLength > 0) {
+			textField.textProperty().addListener(new ChangeListener<String>() {
+				@Override
+				public void changed(final ObservableValue<? extends String> ov, final String oldValue,
+						final String newValue) {
+					if (textField.getText().length() > maxLength) {
+						String s = textField.getText().substring(0, maxLength);
+						textField.setText(s);
+					}
+				}
+			});
+		}
 
 		return textField;
 	}
@@ -276,40 +222,39 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 				: getConverter().toString(getItem());
 	}
 
+	@SuppressWarnings("unchecked")
+	private void execValidation() {
+		this.getStyleClass().remove("invalid");
+		final S registro = (S) this.getTableRow().getItem();
+		if (!validator.isValidField(fieldName, registro)) {
+			this.getStyleClass().add("invalid");
+		}
+	}
+
 	/**
 	 * 
 	 */
 	private void updateItem() {
-		this.getStyleClass().remove("invalid");
-		S registro = (S) this.getTableRow().getItem();
-		if (registro != null) {
-			try {
-				final Method method = registro.getClass().getDeclaredMethod("getEstatus");
-				Map<String, Boolean> map = (Map<String, Boolean>) method.invoke(registro);
-				
-				final Method mt = registro.getClass().getDeclaredMethod("getTooltip", String.class);
-				String tooltip = (String) mt.invoke(registro,fieldName);
-				if (map.get(fieldName).equals(Boolean.FALSE)) {
-					this.getStyleClass().add("invalid");
-					if (tooltip!=null)this.setTooltip(new Tooltip(tooltip));
-				}
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		execValidation();
+		/*
+		 * this.getStyleClass().remove("invalid"); S registro = (S)
+		 * this.getTableRow().getItem(); if (registro != null) { try { final Method
+		 * method = registro.getClass().getDeclaredMethod("getEstatus"); Map<String,
+		 * Boolean> map = (Map<String, Boolean>) method.invoke(registro);
+		 * 
+		 * final Method mt = registro.getClass().getDeclaredMethod("getTooltip",
+		 * String.class); String tooltip = (String) mt.invoke(registro, fieldName); if
+		 * (map.get(fieldName).equals(Boolean.FALSE)) {
+		 * this.getStyleClass().add("invalid"); if (tooltip != null) this.setTooltip(new
+		 * Tooltip(tooltip)); } } catch (NoSuchMethodException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); } catch (SecurityException e)
+		 * { // TODO Auto-generated catch block e.printStackTrace(); } catch
+		 * (IllegalAccessException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } catch (IllegalArgumentException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); } catch
+		 * (InvocationTargetException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } }
+		 */
 
 		if (isEmpty()) {
 			setText(null);

@@ -1,4 +1,4 @@
-package mx.com.bsmexico.customertool.api.layouts.modell.converter;
+package mx.com.bsmexico.customertool.api.layouts.model.converter;
 
 import org.apache.commons.lang3.math.NumberUtils;
 

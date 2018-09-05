@@ -10,6 +10,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
+import mx.com.bsmexico.customertool.api.layouts.model.LayoutMetaModel;
 
 /**
  * @author jchr
@@ -19,18 +20,30 @@ public abstract class LayoutTable<T> extends Region {
 	protected TableView<T> table;
 	protected ColumnTableFactoryAbstract<T> columnFactory;
 	protected final ObservableList<T> data = FXCollections.observableArrayList();
-	
+	protected LayoutMetaModel<T> metamodel;
+	protected Class<T> type;
+
+	protected LayoutTable(final Class<T> type) {
+		this(type, null);
+	}
+
 	/**
 	 * @param layoutFactory
 	 * @throws IllegalArgumentException
 	 */
-	public LayoutTable(final ColumnTableFactoryAbstract<T> columnFactory)
+	public LayoutTable(final Class<T> type, final ColumnTableFactoryAbstract<T> columnFactory)
 			throws IllegalArgumentException, InstantiationError {
 		super();
+		if (type == null) {
+			throw new IllegalArgumentException("Type can not be null");
+		}
 		if (columnFactory == null) {
 			throw new IllegalArgumentException("Factories can not be null");
 		}
 		this.columnFactory = columnFactory;
+		metamodel = new LayoutMetaModel<T>(type);
+		this.columnFactory = (columnFactory == null) ? new ColumnTableFactoryAbstract<T>(metamodel) {
+		} : columnFactory;
 		init();
 	}
 
@@ -59,89 +72,34 @@ public abstract class LayoutTable<T> extends Region {
 		table.getSelectionModel().cellSelectionEnabledProperty().set(true);
 		// when character or numbers pressed it will start edit in editable
 		// fields
-		
-        table.setOnKeyPressed(event -> {
-            TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
-            if (pos != null && (event.getCode().isLetterKey()||event.getCode().isDigitKey())) {
-                table.edit(pos.getRow(), pos.getTableColumn());
-            }
-            if (event.getCode()==KeyCode.TAB){
-                table.requestFocus();
-                if ((pos.getColumn()+1)==table.getColumns().size() 
-                        && (pos.getRow()+1)==table.getItems().size()){
-                    addRow();
-                }
-                
-                KeyCode kc;
-                if (event.isShiftDown()) kc = KeyCode.LEFT;
-                else kc = KeyCode.RIGHT;
-                
-                KeyEvent ke = new KeyEvent(table, table, KeyEvent.KEY_PRESSED, "", "", kc, false,false,false,false);
-                table.fireEvent(ke);
-                
-                if ((pos.getColumn()+1)==table.getColumns().size()){
-                    table.getSelectionModel().selectNext();
-                    table.scrollToColumnIndex(0);
-                }
-            }
-        });
 
-		
-		
-//		table.setOnKeyPressed(event -> {
-//			if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
-//				editFocusedCell();
-//			} else if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.TAB) {
-//				table.getSelectionModel().selectNext();
-//				event.consume();
-//			} else if (event.getCode() == KeyCode.LEFT) {
-//				selectPrevious();
-//				event.consume();
-//			}
-//		});
-	}
-
-	/**
-	 * 
-	 */
-	@SuppressWarnings("unchecked")
-	private void editFocusedCell() {
-		final TablePosition<T, ?> focusedCell = table.focusModelProperty().get().focusedCellProperty().get();
-		table.edit(focusedCell.getRow(), focusedCell.getTableColumn());
-	}
-
-	/**
-	 * 
-	 */
-	@SuppressWarnings("unchecked")
-	private void selectPrevious() {
-		if (table.getSelectionModel().isCellSelectionEnabled()) {
+		table.setOnKeyPressed(event -> {
 			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
-			if (pos.getColumn() - 1 >= 0) {
-				table.getSelectionModel().select(pos.getRow(), getTableColumn(pos.getTableColumn(), -1));
-			} else if (pos.getRow() < table.getItems().size()) {
-				table.getSelectionModel().select(pos.getRow() - 1,
-						table.getVisibleLeafColumn(table.getVisibleLeafColumns().size() - 1));
+			if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
+				table.edit(pos.getRow(), pos.getTableColumn());
 			}
-		} else {
-			int focusIndex = table.getFocusModel().getFocusedIndex();
-			if (focusIndex == -1) {
-				table.getSelectionModel().select(table.getItems().size() - 1);
-			} else if (focusIndex > 0) {
-				table.getSelectionModel().select(focusIndex - 1);
-			}
-		}
-	}
+			if (event.getCode() == KeyCode.TAB) {
+				table.requestFocus();
+				if ((pos.getColumn() + 1) == table.getColumns().size()
+						&& (pos.getRow() + 1) == table.getItems().size()) {
+					addRow();
+				}
 
-	/**
-	 * @param column
-	 * @param offset
-	 * @return
-	 */
-	private TableColumn<T, ?> getTableColumn(final TableColumn<T, ?> column, int offset) {
-		int columnIndex = table.getVisibleLeafIndex(column);
-		int newColumnIndex = columnIndex + offset;
-		return table.getVisibleLeafColumn(newColumnIndex);
+				KeyCode kc;
+				if (event.isShiftDown())
+					kc = KeyCode.LEFT;
+				else
+					kc = KeyCode.RIGHT;
+
+				KeyEvent ke = new KeyEvent(table, table, KeyEvent.KEY_PRESSED, "", "", kc, false, false, false, false);
+				table.fireEvent(ke);
+
+				if ((pos.getColumn() + 1) == table.getColumns().size()) {
+					table.getSelectionModel().selectNext();
+					table.scrollToColumnIndex(0);
+				}
+			}
+		});
 	}
 
 	/**
@@ -159,7 +117,7 @@ public abstract class LayoutTable<T> extends Region {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void setColumns() throws Exception {
-		String[] ids = getFieldOrder();//this.columnFactory.getFieldIds();  
+		String[] ids = getFieldOrder();
 		if (!ArrayUtils.isEmpty(ids)) {
 			TableColumn ct = null;
 			for (String id : ids) {
@@ -174,11 +132,20 @@ public abstract class LayoutTable<T> extends Region {
 		return this.table;
 	}
 
+	/**
+	 * @return
+	 */
 	protected String[] getFieldOrder() {
-		return columnFactory.getFieldIds().toArray(new String[0]);
+		return metamodel.getFieldNames().toArray(new String[0]);
 	}
-	
+
+	/**
+	 * 
+	 */
 	protected abstract void polulate();
 
+	/**
+	 * 
+	 */
 	protected abstract void addRow();
 }

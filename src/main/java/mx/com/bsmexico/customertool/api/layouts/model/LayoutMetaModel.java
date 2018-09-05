@@ -1,38 +1,32 @@
-package mx.com.bsmexico.customertool.api.layouts.modell;
+package mx.com.bsmexico.customertool.api.layouts.model;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import javafx.util.StringConverter;
+import mx.com.bsmexico.customertool.api.layouts.model.validation.LayoutModelValidator;
 
 /**
  * @author jchr
  *
  */
 public class LayoutMetaModel<T> {
-	private static final String METAMODEL_RESTRICTION = "RESTRICTION";
-	private static final String METAMODEL_RESTRICTION_DESC = "RESTRICTION_DESC";
-	private static final String METAMODEL_WRAPPER_CLASS = "WRAPPER_CLASS";
-	private static final String METAMODEL_CONVERT_CLASS = "CONVERT_CLASS";
+	private static final String METAMODEL_VALIDATOR = "validatorClass";
+	private static final String METAMODEL_WRAPPER_CLASS = "wrappedClass";
+	private static final String METAMODEL_CONVERT_CLASS = "converterClass";
 	private static final String METAMODEL_NAME = "name";
 	private static final String METAMODEL_TITLE = "title";
 	private static final String METAMODEL_LENGTH = "length";
 	private static final String METAMODEL_DISABLE = "disable";
 	private static final String METAMODEL_REQUIRED = "required";
-	private static final String METAMODEL_CLASS_FIELD = "CLASS_FIELD";
+	private static final String METAMODEL_CLASS_FIELD = "ClassField";
 
 	private Class<T> model;
 	private Map<String, Map<String, Object>> metamodel;
@@ -53,16 +47,16 @@ public class LayoutMetaModel<T> {
 	/**
 	 * 
 	 */
-	private void init() {		
+	private void init() {
 		setMetadataFields();
-		setMetadataRestrictions();
+		setMetadataClass();
 	}
 
 	/**
 	 * 
 	 */
 	private void setMetadataFields() {
-		final Field[] fields = FieldUtils.getFieldsWithAnnotation(model, LayoutField.class);
+		final Field[] fields = FieldUtils.getFieldsWithAnnotation(model, LayoutField.class);		
 		if (fields != null) {
 			Map<String, Object> attrs = null;
 			String name = StringUtils.EMPTY;
@@ -84,13 +78,21 @@ public class LayoutMetaModel<T> {
 
 	/**
 	 * 
+	 */
+	private void setMetadataClass() {
+		metamodel.put(model.getName(),
+				AnnotationUtils.getAnnotationAttributes(AnnotationUtils.findAnnotation(model, LayoutModel.class)));
+	}
+
+	/**
+	 * 
 	 * @param field
 	 * @param name
 	 */
 	public void setMetadataWrapperClass(final Field field, String name) {
 		final LayoutFieldWrapper annotation = AnnotationUtils.findAnnotation(field, LayoutFieldWrapper.class);
 		if (annotation != null) {
-			metamodel.get(name).put(METAMODEL_WRAPPER_CLASS, annotation.wrappedClass());
+			metamodel.get(name).putAll(AnnotationUtils.getAnnotationAttributes(annotation));
 		}
 	}
 
@@ -101,43 +103,7 @@ public class LayoutMetaModel<T> {
 	public void setMetadataConvertClass(final Field field, final String name) {
 		final LayoutFieldConverter annotation = AnnotationUtils.findAnnotation(field, LayoutFieldConverter.class);
 		if (annotation != null) {
-			metamodel.get(name).put(METAMODEL_CONVERT_CLASS, annotation.conversionClass());
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private void setMetadataRestrictions() {
-		final List<Object> elems = new ArrayList<>();
-		elems.addAll(FieldUtils.getFieldsListWithAnnotation(model, RestrictionLayoutField.class));
-		elems.addAll(MethodUtils.getMethodsListWithAnnotation(model, RestrictionLayoutField.class));
-		if (!elems.isEmpty()) {
-			Map<String, Object> attrs = null;
-			for (Object elem : elems) {
-				if (elem instanceof Field) {
-					if (!((Field) elem).getType().getName().equals("java.util.function.Predicate")) {
-						continue;
-					}
-				}
-				if (elem instanceof Method) {
-					if (!((Method) elem).getReturnType().getName().equals("java.util.function.Predicate")) {
-						continue;
-					}
-				}
-				attrs = AnnotationUtils.getAnnotationAttributes(
-						AnnotationUtils.findAnnotation((AnnotatedElement) elem, RestrictionLayoutField.class));
-				if (attrs != null) {
-					String[] classFields = (String[]) attrs.get("fields");
-					String desc = (String) attrs.get("description");
-					for (String cf : classFields) {
-						if (metamodel.get(cf) != null) {
-							metamodel.get(cf).put(METAMODEL_RESTRICTION, elem);
-							metamodel.get(cf).put(METAMODEL_RESTRICTION_DESC, desc);
-						}
-					}
-				}
-			}
+			metamodel.get(name).putAll(AnnotationUtils.getAnnotationAttributes(annotation));			
 		}
 	}
 
@@ -151,18 +117,11 @@ public class LayoutMetaModel<T> {
 	/**
 	 * @return
 	 */
-	public Set<String> getFieldNames() {		
-		return (this.metamodel == null) ? new HashSet<>() : this.metamodel.keySet();
+	public Set<String> getFieldNames() {
+		final Set<String> names = (this.metamodel == null) ? new HashSet<>() : this.metamodel.keySet();
+		names.remove(model.getName());
+		return names;
 	}
-	
-	public List<String> getFieldIds() {
-		List<String> fieldIds = new ArrayList<String>();
-		for(String s: this.metamodel.keySet()){
-			fieldIds.add(this.getClassFieldName(s));
-		}
-		return fieldIds;
-	}
-
 
 	/**
 	 * @param fieldName
@@ -228,26 +187,23 @@ public class LayoutMetaModel<T> {
 		return (metamodel.get(fieldName) == null) ? null
 				: metamodel.get(fieldName).get(METAMODEL_CLASS_FIELD).toString();
 	}
-	
-	public String getRestrictionDesc(final String fieldName) {
-		return (metamodel.get(fieldName) == null) ? null
-				: metamodel.get(fieldName).get(METAMODEL_RESTRICTION_DESC) == null ? null :metamodel.get(fieldName).get(METAMODEL_RESTRICTION_DESC).toString();
-	}
 
 	/**
 	 * @param fieldName
 	 * @return
+	 * @throws Exception
 	 */
-	@SuppressWarnings("rawtypes")
-	public Predicate getRestriction(final String fieldName) throws Exception{
-		Predicate<?> result = null;
-		if(metamodel.get(fieldName) != null || metamodel.get(fieldName).get(METAMODEL_RESTRICTION) != null){
-			Object obj = metamodel.get(fieldName).get(METAMODEL_RESTRICTION);
-			if(obj instanceof Field) {
-				((Field)obj).setAccessible(true);
-				result = (Predicate<?>) ((Field)obj).get(null);
-			}
-		}
-		return result;
+	@SuppressWarnings({ "unchecked" })
+	public LayoutModelValidator<?> getValidator() throws Exception {
+		Class<? extends LayoutModelValidator<?>> clazz = (metamodel.get(model.getName()) == null
+				|| metamodel.get(model.getName()).get(METAMODEL_VALIDATOR) == null) ? null
+						: (Class<? extends LayoutModelValidator<?>>) metamodel.get(model.getName())
+								.get(METAMODEL_VALIDATOR);
+		return (clazz == null) ? null : clazz.newInstance();
 	}
+
+	public Class<T> getModel() {
+		return model;
+	}
+		
 }

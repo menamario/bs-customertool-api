@@ -165,7 +165,6 @@ public abstract class FeatureMenuNavigator extends MenuNavigator {
 	}
 	
 	protected void builLogicNavigationTree(final List<NavRoute> routes) {
-		// TODO agregar graphic
 		root = new TreeNavNode(ROOT_NAME, NODETYPE.ROOT_NODE, null, 0);
 		root.setGraphic(getGraphicNavigatorNode(null, NODETYPE.ROOT_NODE));
 		if (routes != null) {

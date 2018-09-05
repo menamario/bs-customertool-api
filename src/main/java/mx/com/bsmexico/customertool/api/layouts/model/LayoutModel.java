@@ -1,9 +1,12 @@
-package mx.com.bsmexico.customertool.api.layouts.modell;
+package mx.com.bsmexico.customertool.api.layouts.model;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import mx.com.bsmexico.customertool.api.layouts.model.validation.AlwaysTrueLayoutModelValidator;
+import mx.com.bsmexico.customertool.api.layouts.model.validation.LayoutModelValidator;
 
 /**
  * @author jchr
@@ -16,4 +19,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LayoutModel {
 	LayoutModelType type();
+
+	Class<? extends LayoutModelValidator<?>> validatorClass() default AlwaysTrueLayoutModelValidator.class;
 }
