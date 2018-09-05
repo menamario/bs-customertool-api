@@ -15,9 +15,9 @@ import org.apache.commons.csv.CSVPrinter;
  *
  * @param <T>
  */
-public abstract class CSVExporter <T> implements Exporter<T>{
+public abstract class CSVExporter<T> implements Exporter<T> {
 	protected ExportSource<T> source;
-	
+
 	/**
 	 * @param source
 	 */
@@ -28,25 +28,35 @@ public abstract class CSVExporter <T> implements Exporter<T>{
 		this.source = source;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see mx.com.bsmexico.layoutstool.core.api.layouts.Exporter#export()
 	 */
 	@Override
-	public void export(final File file) throws Exception{
+	public void export(final File file) throws Exception {
 		List<T> records = source.getData();
 		Writer writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
-        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(getHeader()));        
-        if(records != null) {
-        	records.forEach(r ->{
-        		try {
+		CSVFormat format = CSVFormat.DEFAULT;
+		String[] header = getHeader();
+		if(header != null && header.length > 0) {
+			format = format.withHeader(header);
+		}
+		if(getCustomDelimiter() != null) {
+			format = format.withDelimiter(getCustomDelimiter());
+		}
+		CSVPrinter csvPrinter = new CSVPrinter(writer, format);
+		if (records != null) {
+			records.forEach(r -> {
+				try {
 					csvPrinter.printRecord(getRecord(r));
 				} catch (IOException e) {
-					//do nothig
+					// do nothig
 				}
-        	});
-        }
-        csvPrinter.flush();
-        csvPrinter.close();		
+			});
+		}
+		csvPrinter.flush();
+		csvPrinter.close();
 	}
 
 	/**
@@ -54,9 +64,16 @@ public abstract class CSVExporter <T> implements Exporter<T>{
 	 * @return
 	 */
 	protected abstract Object[] getRecord(T obj);
-	
+
 	/**
 	 * @return
 	 */
 	protected abstract String[] getHeader();
+
+	/**
+	 * @return
+	 */
+	protected Character getCustomDelimiter() {
+		return null;
+	}
 }

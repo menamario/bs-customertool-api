@@ -49,15 +49,6 @@ public abstract class CSVImporter<T> implements Importer<T> {
 				records = getRecordsFromStandarCSV(file);
 				break;
 			}
-			/*
-			 * final BufferedReader reader =
-			 * Files.newBufferedReader(Paths.get(file.getAbsolutePath())); final String[]
-			 * headers = getHeader(); if (headers != null) { format =
-			 * CSVFormat.DEFAULT.withHeader(headers); } format =
-			 * format.withIgnoreHeaderCase().withTrim(); final CSVParser csvParser = new
-			 * CSVParser(reader, format); if (csvParser != null) { for (CSVRecord csvRecord
-			 * : csvParser) { data.add(this.getInstance(csvRecord)); } }
-			 */
 
 			if (records != null) {
 				for (List<String> record : records) {
@@ -78,7 +69,8 @@ public abstract class CSVImporter<T> implements Importer<T> {
 		final Sheet sheet = w.getSheet(0);
 		List<String> values = null;
 		String value = null;
-		for (int j = 0; j < sheet.getRows(); j++) {
+		final String[] headers = getHeader();
+		for (int j = (headers == null) ? 0 : 1; j < sheet.getRows(); j++) {
 			values = new ArrayList<>();
 			for (int i = 0; i < sheet.getColumns(); i++) {
 				Cell cell = sheet.getCell(i, j);
@@ -103,10 +95,10 @@ public abstract class CSVImporter<T> implements Importer<T> {
 		if (headers != null) {
 			format = format.withHeader(headers);
 		}
-		format = format.withIgnoreHeaderCase().withTrim();		
-		try(CSVParser csvParser = new CSVParser(reader, format)){
+		format = format.withIgnoreHeaderCase().withTrim();
+		try (CSVParser csvParser = new CSVParser(reader, format)) {
 			if (csvParser != null) {
-				List<String> values = null;			
+				List<String> values = null;
 				for (CSVRecord csvRecord : csvParser) {
 					values = new ArrayList<>();
 					Iterator<String> itr = csvRecord.iterator();
@@ -116,7 +108,7 @@ public abstract class CSVImporter<T> implements Importer<T> {
 					records.add(values);
 				}
 			}
-		}		
+		}
 		return records;
 	}
 

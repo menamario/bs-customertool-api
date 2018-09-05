@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,7 +40,7 @@ public class ExporterTest {
 			}
 		};
 
-		final CSVExporter<Beneficiario> exporter = new CSVExporter<Beneficiario>(source) {
+		final CSVExporter<Beneficiario> exporter = new CSVExporter<Beneficiario>(source) {			
 
 			@Override
 			protected Object[] getRecord(Beneficiario beneficiario) {
@@ -63,6 +64,7 @@ public class ExporterTest {
 				return null;
 			}
 		};
+		
 		final ClassLoader classLoader = getClass().getClassLoader();
 		final File file = new File(classLoader.getResource("out/testExport.csv").getFile());
 		try {
@@ -70,6 +72,7 @@ public class ExporterTest {
 			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 				String st;
 				while ((st = br.readLine()) != null) {
+					System.out.println(st);
 					Assert.assertTrue("00000000,111111,000,00,MXN,0.00,00,Test,Test,Test,Test".equals(st));
 				}
 			}
