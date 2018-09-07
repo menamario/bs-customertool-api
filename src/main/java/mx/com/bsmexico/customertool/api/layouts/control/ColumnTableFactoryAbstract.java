@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -56,9 +57,48 @@ public abstract class ColumnTableFactoryAbstract<S> {
 	 * @param width
 	 * @return
 	 * @throws Exception
+	 */	
+	public <T> TableColumn<S, T> getDefaultColumn(final String fieldName, final int width) throws Exception {
+
+		final TableColumn<S, T> column = new TableColumn<>();
+		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
+		column.setGraphic(firstNameLabel);
+		column.setId(fieldName);
+		column.setPrefWidth(width);		
+		column.setCellValueFactory(new PropertyValueFactory<S, T>(metamodel.getClassFieldName(fieldName)));		
+		return column;
+	}
+	
+	/**
+	 * @param field
+	 * @param typeContentClass
+	 * @param converter
+	 * @param width
+	 * @return
+	 * @throws Exception
+	 */	
+	public <T> TableColumn<S, Boolean> getCheckColumn(final String fieldName, final int width) throws Exception {
+
+		final TableColumn<S, Boolean> column = new TableColumn<>();
+		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
+		column.setGraphic(firstNameLabel);
+		column.setId(fieldName);
+		column.setPrefWidth(width);		
+		column.setCellValueFactory(new PropertyValueFactory<S, Boolean>(metamodel.getClassFieldName(fieldName)));
+		column.setCellFactory(CheckBoxTableCell.forTableColumn(column));
+		return column;
+	}
+	
+	/**
+	 * @param field
+	 * @param typeContentClass
+	 * @param converter
+	 * @param width
+	 * @return
+	 * @throws Exception
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> TableColumn<S, T> getInstance(final String fieldName, final int width) throws Exception {
+	public <T> TableColumn<S, T> getEditableColumn(final String fieldName, final int width) throws Exception {
 
 		final TableColumn<S, T> column = new TableColumn<>();
 		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
