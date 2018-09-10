@@ -32,8 +32,8 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 		final TableColumn<S, T> column = new TableColumn<>();
 		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
 		column.setGraphic(firstNameLabel);
-
 		column.setId(fieldName);
+		column.setVisible(!metamodel.isHidden(fieldName));
 		final StringConverter converter = (metamodel.getConverter(fieldName) == null)
 				? (StringConverter) new DefaultStringConverter()
 				: metamodel.getConverter(fieldName);
@@ -46,7 +46,7 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 				if (metamodel.isDisabled(fieldName)) {
 					cell.setDisable(true);
 					cell.setStyle("-fx-background-color: gray;");
-				}
+				}				
 				cell.setmaxLength(metamodel.getLength(fieldName));
 				return cell;
 			}

@@ -25,6 +25,7 @@ public class LayoutMetaModel<T> {
 	private static final String METAMODEL_TITLE = "title";
 	private static final String METAMODEL_LENGTH = "length";
 	private static final String METAMODEL_DISABLE = "disable";
+	private static final String METAMODEL_HIDDEN = "hidden";
 	private static final String METAMODEL_REQUIRED = "required";
 	private static final String METAMODEL_CLASS_FIELD = "ClassField";
 
@@ -146,6 +147,14 @@ public class LayoutMetaModel<T> {
 	 */
 	public boolean isDisabled(final String fieldName) {
 		return (metamodel.get(fieldName) == null) ? null : (Boolean) metamodel.get(fieldName).get(METAMODEL_DISABLE);
+	}
+	
+	/**
+	 * @param fieldName
+	 * @return
+	 */
+	public boolean isHidden(final String fieldName) {
+		return (metamodel.get(fieldName) == null) ? null : (Boolean) metamodel.get(fieldName).get(METAMODEL_HIDDEN);
 	}
 
 	/**

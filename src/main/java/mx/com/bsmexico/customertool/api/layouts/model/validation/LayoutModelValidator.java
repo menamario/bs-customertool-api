@@ -1,6 +1,5 @@
 package mx.com.bsmexico.customertool.api.layouts.model.validation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

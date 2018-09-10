@@ -18,6 +18,7 @@ public class DefaultColumnTableFactory<S> extends ColumnTableFactoryAbstract<S> 
 	@Override
 	public <T> TableColumn<S, T> getColumn(String fieldName, int width) throws Exception {
 		final TableColumn<S, T> column = new TableColumn<>();
+		column.setVisible(!metamodel.isHidden(fieldName));
 		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
 		column.setGraphic(firstNameLabel);
 		column.setId(fieldName);
