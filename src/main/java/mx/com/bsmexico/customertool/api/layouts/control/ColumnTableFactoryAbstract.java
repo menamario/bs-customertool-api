@@ -118,6 +118,9 @@ public abstract class ColumnTableFactoryAbstract<S> {
 					cell.setDisable(true);
 					cell.setStyle("-fx-background-color: gray;");
 				}
+				if (!metamodel.isEditable(fieldName)) {
+					cell.setEditable(false);
+				}
 				cell.setmaxLength(metamodel.getLength(fieldName));
 				return cell;
 			}

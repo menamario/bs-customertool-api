@@ -226,7 +226,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	private void execValidation() {
 		this.getStyleClass().remove("invalid");
 		final S registro = (S) this.getTableRow().getItem();
-		if (!validator.isValidField(fieldName, registro)) {
+		if (isEditable() && !validator.isValidField(fieldName, registro)) {
 			this.getStyleClass().add("invalid");
 		}
 	}

@@ -46,4 +46,6 @@ public @interface LayoutField {
 	 * @return
 	 */
 	boolean required() default true;
+	
+	boolean editable() default true;
 }
