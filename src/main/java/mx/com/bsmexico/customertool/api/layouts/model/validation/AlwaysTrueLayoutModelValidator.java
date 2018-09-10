@@ -26,4 +26,10 @@ public class AlwaysTrueLayoutModelValidator extends LayoutModelValidator<Object>
 		return StringUtils.EMPTY;
 	}
 
+	@Override
+	public boolean isActive(Object model) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 }

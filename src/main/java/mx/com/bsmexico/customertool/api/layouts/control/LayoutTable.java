@@ -46,6 +46,10 @@ public abstract class LayoutTable<T> extends TableView<T> {
 	 * 
 	 */
 	public abstract boolean validateTable() throws Exception;
+	
+	public abstract boolean validateModel(T model) throws Exception;
+	
+	public abstract boolean isActiveModel(T model) throws Exception;
 	/**
 	 * @return
 	 */
