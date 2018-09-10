@@ -2,6 +2,8 @@ package mx.com.bsmexico.customertool.api.layouts.model.validation;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class AlwaysTrueLayoutModelValidator extends LayoutModelValidator<Object> {
 
 	@Override
@@ -17,6 +19,11 @@ public class AlwaysTrueLayoutModelValidator extends LayoutModelValidator<Object>
 	@Override
 	public boolean isValid(List<Object> models) {
 		return true;
+	}
+
+	@Override
+	public String getValidationDescription(String fieldName) {
+		return StringUtils.EMPTY;
 	}
 
 }

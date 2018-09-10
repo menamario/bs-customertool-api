@@ -10,6 +10,7 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -22,7 +23,7 @@ import mx.com.bsmexico.customertool.api.layouts.model.validation.LayoutModelVali
  * @param <S>
  * @param <T>
  */
-public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
+public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 
 	private TextField textField;
 	private boolean escapePressed = false;
@@ -30,12 +31,14 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	private LayoutModelValidator<S> validator;
 	private String fieldName;
 	private int maxLength;
+	private boolean validationError = false;
 
 	/**
 	 * @param converter
 	 */
 	public TextFieldEditCell(final String field) {
 		super();
+		this.fieldName = field;
 	}
 
 	/**
@@ -132,6 +135,16 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	}
 
 	/**
+	 * 
+	 */
+	public void determinateInvalidStyle() {
+		this.getStyleClass().remove("invalid");
+		if (this.validationError) {
+			this.getStyleClass().add("invalid");
+		}
+	}
+
+	/**
 	 * @return
 	 */
 	private TextField getTextField() {
@@ -223,39 +236,28 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void execValidation() {
-		this.getStyleClass().remove("invalid");
-		final S registro = (S) this.getTableRow().getItem();
-		if (!validator.isValidField(fieldName, registro)) {
-			this.getStyleClass().add("invalid");
-		}
+	private void executeValidation() {
+		if(this.getTableView() instanceof LayoutTable) {
+			if(((LayoutTable<S>) this.getTableView()).isValidated()) {
+				this.getStyleClass().remove("invalid");
+				if(this.getTooltip() != null) {
+					this.setTooltip(null);			
+				}
+				
+				final S registro = (S) this.getTableRow().getItem();
+				if (!validator.isValidField(fieldName, registro)) {
+					this.getStyleClass().add("invalid");
+					this.setTooltip(new Tooltip(validator.getValidationDescription(fieldName)));
+				}
+			}
+		}		
 	}
 
 	/**
 	 * 
 	 */
 	private void updateItem() {
-		execValidation();
-		/*
-		 * this.getStyleClass().remove("invalid"); S registro = (S)
-		 * this.getTableRow().getItem(); if (registro != null) { try { final Method
-		 * method = registro.getClass().getDeclaredMethod("getEstatus"); Map<String,
-		 * Boolean> map = (Map<String, Boolean>) method.invoke(registro);
-		 * 
-		 * final Method mt = registro.getClass().getDeclaredMethod("getTooltip",
-		 * String.class); String tooltip = (String) mt.invoke(registro, fieldName); if
-		 * (map.get(fieldName).equals(Boolean.FALSE)) {
-		 * this.getStyleClass().add("invalid"); if (tooltip != null) this.setTooltip(new
-		 * Tooltip(tooltip)); } } catch (NoSuchMethodException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); } catch (SecurityException e)
-		 * { // TODO Auto-generated catch block e.printStackTrace(); } catch
-		 * (IllegalAccessException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } catch (IllegalArgumentException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); } catch
-		 * (InvocationTargetException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } }
-		 */
-
+		executeValidation();
 		if (isEmpty()) {
 			setText(null);
 			setGraphic(null);
@@ -287,4 +289,5 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 		// TextField
 		textField.requestFocus();
 	}
+
 }

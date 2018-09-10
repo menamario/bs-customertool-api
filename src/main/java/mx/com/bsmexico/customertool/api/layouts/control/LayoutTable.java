@@ -2,27 +2,19 @@ package mx.com.bsmexico.customertool.api.layouts.control;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Region;
 import mx.com.bsmexico.customertool.api.layouts.model.LayoutMetaModel;
 
 /**
  * @author jchr
  *
  */
-public abstract class LayoutTable<T> extends Region {
-	protected TableView<T> table;
+public abstract class LayoutTable<T> extends TableView<T> {	
 	protected ColumnTableFactoryAbstract<T> columnFactory;
 	protected final ObservableList<T> data = FXCollections.observableArrayList();
 	protected LayoutMetaModel<T> metamodel;
 	protected Class<T> type;
-
-	protected LayoutTable(final Class<T> type) {
-		this(type, null);
-	}
+	protected boolean validated = false;
 
 	/**
 	 * @param layoutFactory
@@ -39,66 +31,27 @@ public abstract class LayoutTable<T> extends Region {
 		}
 		this.columnFactory = columnFactory;
 		metamodel = new LayoutMetaModel<T>(type);
-		this.columnFactory = (columnFactory == null) ? new ColumnTableFactoryAbstract<T>(metamodel) {
-		} : columnFactory;
-		init();
 	}
+		
+
+	/**
+	 * @return the inEvaluation
+	 */
+	public boolean isValidated() {
+		return validated;
+	}
+
 
 	/**
 	 * 
-	 * @throws InstantiationError
 	 */
-	protected void init() throws InstantiationError {
-		try {
-			this.table = new TableView<T>();
-			setColumns();
-			polulate();
-			this.table.setItems(data);
-			getChildren().add(this.table);
-			this.table.getSelectionModel().setCellSelectionEnabled(true);
-			setTableEditable();
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			throw new InstantiationError(exception.getMessage());
-		}
-	}
-
-	private void setTableEditable() {
-		table.setEditable(true);
-		// allows the individual cells to be selected
-		table.getSelectionModel().cellSelectionEnabledProperty().set(true);
-		// when character or numbers pressed it will start edit in editable
-		// fields
-
-		table.setOnKeyPressed(event -> {
-			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
-			if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
-				table.edit(pos.getRow(), pos.getTableColumn());
-			}
-			if (event.getCode() == KeyCode.TAB) {
-				table.requestFocus();
-				if ((pos.getColumn() + 1) == table.getColumns().size()
-						&& (pos.getRow() + 1) == table.getItems().size()) {
-					addRow();
-				}
-
-				KeyCode kc;
-				if (event.isShiftDown())
-					kc = KeyCode.LEFT;
-				else
-					kc = KeyCode.RIGHT;
-
-				KeyEvent ke = new KeyEvent(table, table, KeyEvent.KEY_PRESSED, "", "", kc, false, false, false, false);
-				table.fireEvent(ke);
-
-				if ((pos.getColumn() + 1) == table.getColumns().size()) {
-					table.getSelectionModel().selectNext();
-					table.scrollToColumnIndex(0);
-				}
-			}
-		});
-	}
-
+	public abstract boolean validateTable() throws Exception;
+	/**
+	 * @return
+	 */
+	//public TableView<T> getTable() {
+		//return this.table;
+	//}
 
 	/**
 	 * @throws Exception
@@ -108,16 +61,7 @@ public abstract class LayoutTable<T> extends Region {
 	/**
 	 * @return
 	 */
-	public TableView<T> getTable() {
-		return this.table;
-	}
-
-	/**
-	 * @return
-	 */
-	protected String[] getFieldOrder() {
-		return metamodel.getFieldNames().toArray(new String[0]);
-	}
+	protected abstract String[] getFieldOrder();
 
 	/**
 	 * 
@@ -128,4 +72,5 @@ public abstract class LayoutTable<T> extends Region {
 	 * 
 	 */
 	protected abstract void addRow();
+	
 }

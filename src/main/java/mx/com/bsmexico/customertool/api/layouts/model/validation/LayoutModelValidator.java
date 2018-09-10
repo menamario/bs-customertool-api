@@ -1,5 +1,6 @@
 package mx.com.bsmexico.customertool.api.layouts.model.validation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,6 +10,7 @@ import java.util.List;
  */
 public abstract class LayoutModelValidator<S> {
 
+
 	/**
 	 * 
 	 * @param fieldName
@@ -16,6 +18,12 @@ public abstract class LayoutModelValidator<S> {
 	 * @return
 	 */
 	public abstract boolean isValidField(String fieldName, S model);
+
+	/**
+	 * @param fieldName
+	 * @return
+	 */
+	public abstract String getValidationDescription(String fieldName);
 
 	/**
 	 * @param model

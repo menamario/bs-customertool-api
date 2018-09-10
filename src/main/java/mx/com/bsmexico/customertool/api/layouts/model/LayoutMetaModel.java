@@ -30,6 +30,7 @@ public class LayoutMetaModel<T> {
 
 	private Class<T> model;
 	private Map<String, Map<String, Object>> metamodel;
+	private LayoutModelValidator<?> validator;
 
 	/**
 	 * @param model
@@ -199,7 +200,8 @@ public class LayoutMetaModel<T> {
 				|| metamodel.get(model.getName()).get(METAMODEL_VALIDATOR) == null) ? null
 						: (Class<? extends LayoutModelValidator<?>>) metamodel.get(model.getName())
 								.get(METAMODEL_VALIDATOR);
-		return (clazz == null) ? null : clazz.newInstance();
+		validator = clazz.newInstance();
+		return (validator == null) ? null : validator;
 	}
 
 	public Class<T> getModel() {
