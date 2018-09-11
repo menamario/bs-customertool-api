@@ -1,4 +1,4 @@
-package mx.com.bsmexico.customertool.api.exporter;
+package mx.com.bsmexico.customertool.api.importer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,8 +51,12 @@ public abstract class CSVImporter<T> implements Importer<T> {
 			}
 
 			if (records != null) {
+				T instance = null;
 				for (List<String> record : records) {
-					data.add(this.getInstance(record));
+					instance = this.getInstance(record);
+					if (instance != null) {
+						data.add(instance);
+					}
 				}
 			}
 		}
@@ -63,7 +67,7 @@ public abstract class CSVImporter<T> implements Importer<T> {
 	 * @param file
 	 * @return
 	 */
-	public List<List<String>> getRecordsFromExcel(final File file) throws Exception {
+	private List<List<String>> getRecordsFromExcel(final File file) throws Exception {
 		final List<List<String>> records = new ArrayList<>();
 		final Workbook w = Workbook.getWorkbook(file);
 		final Sheet sheet = w.getSheet(0);
@@ -87,13 +91,16 @@ public abstract class CSVImporter<T> implements Importer<T> {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<List<String>> getRecordsFromStandarCSV(final File file) throws Exception {
+	private List<List<String>> getRecordsFromStandarCSV(final File file) throws Exception {
 		final List<List<String>> records = new ArrayList<>();
 		final BufferedReader reader = Files.newBufferedReader(Paths.get(file.getAbsolutePath()));
 		final String[] headers = getHeader();
 		CSVFormat format = CSVFormat.DEFAULT;
 		if (headers != null) {
 			format = format.withHeader(headers);
+		}
+		if (getCustomDelimiter() != null) {
+			format = format.withDelimiter(getCustomDelimiter());
 		}
 		format = format.withIgnoreHeaderCase().withTrim();
 		try (CSVParser csvParser = new CSVParser(reader, format)) {
@@ -122,5 +129,12 @@ public abstract class CSVImporter<T> implements Importer<T> {
 	 * @return
 	 */
 	protected abstract String[] getHeader();
+
+	/**
+	 * @return
+	 */
+	protected Character getCustomDelimiter() {
+		return null;
+	}
 
 }

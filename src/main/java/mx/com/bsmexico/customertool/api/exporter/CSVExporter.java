@@ -44,7 +44,7 @@ public abstract class CSVExporter<T> implements Exporter<T> {
 		}
 		if(getCustomDelimiter() != null) {
 			format = format.withDelimiter(getCustomDelimiter());
-		}
+		}		
 		CSVPrinter csvPrinter = new CSVPrinter(writer, format);
 		if (records != null) {
 			records.forEach(r -> {
