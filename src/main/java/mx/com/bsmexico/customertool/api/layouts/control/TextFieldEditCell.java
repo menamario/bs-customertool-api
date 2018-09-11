@@ -12,6 +12,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
@@ -284,7 +286,24 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 		}
 		setText(null);
 		setGraphic(textField);
-		textField.selectAll();
+		
+		final Clipboard clipboard = Clipboard.getSystemClipboard();
+		String cbHtml = clipboard.getHtml();
+		String cbUrl = clipboard.getUrl();
+		if(cbHtml!=null){
+			textField.setText(cbHtml);
+			clipboard.clear();
+			textField.selectAll();
+		}else if(cbUrl!=null){
+			textField.setText(cbUrl);
+			textField.forward();
+			clipboard.clear();
+		}else{
+			textField.selectAll();
+		}
+		
+		
+		
 		// requesting focus so that key input can immediately go into the
 		// TextField
 		textField.requestFocus();

@@ -5,6 +5,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -50,6 +53,7 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 			//getChildren().add(this.table);
 			getSelectionModel().setCellSelectionEnabled(true);
 			setTableEditable();
+			setStyle("-fx-selection-cell: red; -fx-selection-bar-non-focused: salmon;");
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			throw new InstantiationError(exception.getMessage());
@@ -66,14 +70,32 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		final TableView table = this;
 		setOnKeyPressed(event -> {
 			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
-			if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
+			
+			if(pos!=null && event.getCode()==KeyCode.C && event.isControlDown()){
+				 final Clipboard clipboard = Clipboard.getSystemClipboard();
+			     final ClipboardContent content = new ClipboardContent();
+			     content.putString(pos.getTableColumn().getCellData(pos.getRow()).toString());
+			     clipboard.setContent(content);
+			}else if (pos!=null && event.getCode()==KeyCode.V && event.isControlDown()){
+				final Clipboard clipboard = Clipboard.getSystemClipboard();
+				final ClipboardContent content = new ClipboardContent();
+				String cb = clipboard.getString();
+				content.put(DataFormat.HTML, cb);
+				clipboard.setContent(content);
 				table.edit(pos.getRow(), pos.getTableColumn());
+			}else if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
+				final Clipboard clipboard = Clipboard.getSystemClipboard();
+				final ClipboardContent content = new ClipboardContent();
+				content.put(DataFormat.URL, event.getText());
+				clipboard.setContent(content);
+                table.edit(pos.getRow(), pos.getTableColumn());
 			}
 			if (event.getCode() == KeyCode.TAB) {
 				table.requestFocus();
 				if ((pos.getColumn() + 1) == table.getColumns().size()
 						&& (pos.getRow() + 1) == table.getItems().size()) {
 					addRow();
+					refresh();
 				}
 
 				KeyCode kc;
@@ -100,5 +122,7 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 	protected String[] getFieldOrder() {
 		return metamodel.getFieldNames().toArray(new String[0]);
 	}
+	
+	
 
 }
