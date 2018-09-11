@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 
 /**
  * @author jchr
@@ -42,6 +43,9 @@ public abstract class CSVExporter<T> implements Exporter<T> {
 		if(header != null && header.length > 0) {
 			format = format.withHeader(header);
 		}
+		if(getQuoteMode() != null) {
+			format = format.withQuoteMode(getQuoteMode());
+		}
 		if(getCustomDelimiter() != null) {
 			format = format.withDelimiter(getCustomDelimiter());
 		}		
@@ -74,6 +78,13 @@ public abstract class CSVExporter<T> implements Exporter<T> {
 	 * @return
 	 */
 	protected Character getCustomDelimiter() {
+		return null;
+	}
+	
+	/**
+	 * @return
+	 */
+	protected QuoteMode getQuoteMode() {
 		return null;
 	}
 }
