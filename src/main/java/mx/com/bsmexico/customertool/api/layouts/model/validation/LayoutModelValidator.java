@@ -35,4 +35,10 @@ public abstract class LayoutModelValidator<S> {
 	 * @return
 	 */
 	public abstract boolean isValid(List<S> models);
+	
+	/**
+	 * @param model
+	 * @return
+	 */
+	public abstract boolean isActive(S model);
 }

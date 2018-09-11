@@ -238,14 +238,14 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 	@SuppressWarnings("unchecked")
 	private void executeValidation() {
 		if(this.getTableView() instanceof LayoutTable) {
-			if(((LayoutTable<S>) this.getTableView()).isValidated()) {
+			if(((LayoutTable<S>) this.getTableView()).isValidated() && isEditable()) {
 				this.getStyleClass().remove("invalid");
 				if(this.getTooltip() != null) {
 					this.setTooltip(null);			
 				}
 				
 				final S registro = (S) this.getTableRow().getItem();
-				if (!validator.isValidField(fieldName, registro)) {
+				if (validator.isActive(registro) && !validator.isValidField(fieldName, registro)) {
 					this.getStyleClass().add("invalid");
 					this.setTooltip(new Tooltip(validator.getValidationDescription(fieldName)));
 				}

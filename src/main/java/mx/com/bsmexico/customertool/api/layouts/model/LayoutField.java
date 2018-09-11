@@ -38,7 +38,7 @@ public @interface LayoutField {
 	 * 
 	 * @return
 	 */
-	boolean disable() default false;		
+	boolean disable() default false;
 
 	/**
 	 * The meaning of this attribute depends on the context in which it is used
@@ -46,7 +46,7 @@ public @interface LayoutField {
 	 * @return
 	 */
 	boolean required() default true;
-	
+
 	/**
 	 * 
 	 * The meaning of this attribute depends on the context in which it is used
@@ -54,4 +54,12 @@ public @interface LayoutField {
 	 * @return
 	 */
 	boolean hidden() default false;
+
+	/**
+	 * 
+	 * The meaning of this attribute depends on the context in which it is used
+	 * 
+	 * @return
+	 */
+	boolean editable() default true;
 }
