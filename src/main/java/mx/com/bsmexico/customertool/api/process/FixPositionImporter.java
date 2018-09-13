@@ -1,4 +1,4 @@
-package mx.com.bsmexico.customertool.api.importer;
+package mx.com.bsmexico.customertool.api.process;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,8 +10,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author jchr
+ *
+ * @param <T>
+ */
 public abstract class FixPositionImporter<T> implements Importer<T> {
 	private ImportTarget<T> target;
+	private boolean trim;
 
 	public FixPositionImporter(final ImportTarget<T> target) throws IllegalArgumentException {
 		if (target == null) {
@@ -32,7 +38,7 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 			throw new IllegalArgumentException("File can not be read");
 		}
 		List<T> data = new ArrayList<>();
-		final List<FixPosition> positions = this.getFixPositions();
+		final List<RecordPosition> positions = this.getFixPositions();
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")))) {
 			T instance = null;
@@ -48,22 +54,47 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 		}
 	}
 
-	private List<String> getRecord(final String line, final List<FixPosition> positions) throws Exception {
+	/**
+	 * @param trim
+	 */
+	public void withTrim(final boolean trim) {
+		this.trim = trim;
+	}
+
+	/**
+	 * @param line
+	 * @param positions
+	 * @return
+	 * @throws Exception
+	 */
+	private List<String> getRecord(final String line, final List<RecordPosition> positions) throws Exception {
 		final List<String> record = new ArrayList<String>();
 		if (StringUtils.isBlank(line) || (positions == null || positions.isEmpty())) {
 			record.add(line);
 		} else {
-			final StringBuffer buffer = new StringBuffer(line);
 			positions.forEach(p -> {
-				if (p.start < 0 || p.start > line.length() - 1 || p.end <= 0 || p.end > line.length() - 1
-						|| p.start > p.end) {
-					throw new IllegalArgumentException("Illegal position[" + p.start + "-" + p.end + "]");
-				} else {
-					record.add(buffer.substring(p.start, p.end));
-				}
+				final String part = extractValue(p.getStart(), p.getEnd(), line, trim);
+				record.add((part == null) ? StringUtils.EMPTY : part);
 			});
 		}
 		return record;
+	}
+
+	/**
+	 * Extract the sequence of character in according to position (start-end)
+	 * 
+	 * @param line
+	 * @return
+	 */
+	private String extractValue(final int start, final int end, final String line, final boolean trim) {
+		String value = StringUtils.EMPTY;
+		if (StringUtils.isNotBlank(line)) {			
+			final int limit = line.length() - 1;			
+			if (start >= 0 && start < limit && end > start && end <= limit) {
+				value = StringUtils.substring(line, start, end);
+			}
+		}
+		return (trim) ? value.trim() : value;
 	}
 
 	/**
@@ -76,37 +107,5 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 	 * @param record
 	 * @return
 	 */
-	protected abstract List<FixPosition> getFixPositions();
-
-	/**
-	 * @author jchr
-	 *
-	 */
-	public static class FixPosition {
-		private int start;
-		private int end;
-
-		public FixPosition(final int start, final int end) {
-			this.start = start;
-			this.end = end;
-		}
-
-		public int getStart() {
-			return start;
-		}
-
-		public void setStart(int start) {
-			this.start = start;
-		}
-
-		public int getEnd() {
-			return end;
-		}
-
-		public void setEnd(int end) {
-			this.end = end;
-		}
-
-	}
-
+	protected abstract List<RecordPosition> getFixPositions();
 }

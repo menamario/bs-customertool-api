@@ -1,4 +1,4 @@
-package mx.com.bsmexico.customertool.api.exporter;
+package mx.com.bsmexico.customertool.api.process;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.QuoteMode;
 
 /**
  * @author jchr
@@ -36,20 +35,17 @@ public abstract class CSVExporter<T> implements Exporter<T> {
 	 */
 	@Override
 	public void export(final File file) throws Exception {
-		List<T> records = source.getData();
-		Writer writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
+		final List<T> records = source.getData();
+		final Writer writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
 		CSVFormat format = CSVFormat.DEFAULT;
-		String[] header = getHeader();
+		final String[] header = getHeader();
 		if(header != null && header.length > 0) {
 			format = format.withHeader(header);
-		}
-		if(getQuoteMode() != null) {
-			format = format.withQuoteMode(getQuoteMode());
-		}
+		}		
 		if(getCustomDelimiter() != null) {
 			format = format.withDelimiter(getCustomDelimiter());
 		}		
-		CSVPrinter csvPrinter = new CSVPrinter(writer, format);
+		CSVPrinter csvPrinter = new CSVPrinter(writer, format);		
 		if (records != null) {
 			records.forEach(r -> {
 				try {
@@ -78,13 +74,6 @@ public abstract class CSVExporter<T> implements Exporter<T> {
 	 * @return
 	 */
 	protected Character getCustomDelimiter() {
-		return null;
-	}
-	
-	/**
-	 * @return
-	 */
-	protected QuoteMode getQuoteMode() {
 		return null;
 	}
 }

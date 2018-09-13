@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import mx.com.bsmexico.customertool.api.importer.CSVImporter;
-import mx.com.bsmexico.customertool.api.importer.ImportTarget;
+import mx.com.bsmexico.customertool.api.process.CSVImporter;
+import mx.com.bsmexico.customertool.api.process.ImportTarget;
 import mx.com.bsmexico.layoutstool.test.api.misc.Beneficiario;
 
 public class ImporterTest {

@@ -9,8 +9,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import mx.com.bsmexico.customertool.api.exporter.CSVExporter;
-import mx.com.bsmexico.customertool.api.exporter.ExportSource;
+import mx.com.bsmexico.customertool.api.process.CSVExporter;
+import mx.com.bsmexico.customertool.api.process.ExportSource;
 import mx.com.bsmexico.layoutstool.test.api.misc.Beneficiario;
 
 public class ExporterTest {
@@ -75,7 +75,6 @@ public class ExporterTest {
 					Assert.assertTrue("00000000,111111,000,00,MXN,0.00,00,Test,Test,Test,Test".equals(st));
 				}
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
