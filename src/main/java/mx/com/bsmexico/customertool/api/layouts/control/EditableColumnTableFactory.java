@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -31,6 +32,7 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 	public <T> TableColumn<S, T> getColumn(String fieldName, int width) throws Exception {
 		final TableColumn<S, T> column = new TableColumn<>();
 		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
+		firstNameLabel.setTooltip(new Tooltip(metamodel.getValidator().getValidationDescription(fieldName)));
 		column.setGraphic(firstNameLabel);
 		column.setId(fieldName);
 		column.setVisible(!metamodel.isHidden(fieldName));

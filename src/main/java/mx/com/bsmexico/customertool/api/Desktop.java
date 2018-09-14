@@ -6,18 +6,17 @@ import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 public abstract class Desktop extends Region {
-	
+
 	MenuNavigator menu;
 	Pane workArea = new Pane();
 	Stage stage;
-	
-	
+
 	public Desktop(final MenuNavigator menu) {
 		super();
 		this.menu = menu;
 		getChildren().add(buildDesktop());
-	}	
-	
+	}
+
 	protected MenuNavigator getMenu() {
 		return menu;
 	}
@@ -26,32 +25,36 @@ public abstract class Desktop extends Region {
 		this.menu = menu;
 	}
 
-
 	public Pane getWorkArea() {
 		return workArea;
 	}
 
-
 	public void setWorkArea(Pane workArea) {
 		this.workArea = workArea;
-		loadWorkArea();
+			loadWorkArea();
 	}
-	
-	public void render(){
+
+	public void render() {
 		this.menu.render();
 	}
-	
+
 	public abstract void hideMenu();
+
 	public abstract void showMenu();
+
 	public abstract void loadWorkArea();
 	
+	public void updatePleca(String color, String nombre){
+		//Do nothing by default
+	}
+
 	protected abstract Node buildDesktop();
 
 	public void setStage(Stage primaryStage) {
 		this.stage = primaryStage;
 	}
-	
-	public Stage getStage(){
+
+	public Stage getStage() {
 		return this.stage;
 	}
 
