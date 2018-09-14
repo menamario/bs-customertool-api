@@ -7,9 +7,9 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.cell.CheckBoxTableCell;
 
 public class CheckboxCell<T> extends CheckBoxTableCell<T, Boolean> {
-	private CheckBox checkBox;
+	protected CheckBox checkBox;
 
-	public CheckboxCell() {
+	public CheckboxCell() {		
 		checkBox = new CheckBox();
 		checkBox.setDisable(true);
 		checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -24,7 +24,7 @@ public class CheckboxCell<T> extends CheckBoxTableCell<T, Boolean> {
 	}
 
 	@Override
-	public void startEdit() {
+	public void startEdit() {		
 		super.startEdit();
 		if (isEmpty()) {
 			return;
@@ -40,6 +40,7 @@ public class CheckboxCell<T> extends CheckBoxTableCell<T, Boolean> {
 	}
 
 	public void commitEdit(Boolean value) {
+		System.out.println("HOLA");
 		super.commitEdit(value);
 		checkBox.setDisable(true);
 	}
