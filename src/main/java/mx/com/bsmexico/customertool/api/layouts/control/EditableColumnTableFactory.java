@@ -36,6 +36,7 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 		column.setGraphic(firstNameLabel);
 		column.setId(fieldName);
 		column.setVisible(!metamodel.isHidden(fieldName));
+		column.setSortable(false);
 		final StringConverter converter = (metamodel.getConverter(fieldName) == null)
 				? (StringConverter) new DefaultStringConverter()
 				: metamodel.getConverter(fieldName);

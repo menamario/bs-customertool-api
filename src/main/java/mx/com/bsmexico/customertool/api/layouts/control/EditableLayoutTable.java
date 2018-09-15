@@ -71,7 +71,9 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		setOnKeyPressed(event -> {
 			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
 			
-			if(pos!=null && event.getCode()==KeyCode.C && event.isControlDown()){
+			if(pos!=null && event.getCode()==KeyCode.DELETE){
+             //TODO implementar este pedo
+			}else if(pos!=null && event.getCode()==KeyCode.C && event.isControlDown()){
 				 final Clipboard clipboard = Clipboard.getSystemClipboard();
 			     final ClipboardContent content = new ClipboardContent();
 			     content.putString(pos.getTableColumn().getCellData(pos.getRow()).toString());
