@@ -16,11 +16,13 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 
 public class ReportGenerator {
 
@@ -89,6 +91,8 @@ public class ReportGenerator {
 		case XLS:
 			xls(print, output);
 			break;
+		case XLSX:
+			xlsx(print, output);
 		}
 	}
 
@@ -118,13 +122,41 @@ public class ReportGenerator {
 	 * @param print
 	 * @throws JRException
 	 */
-	public static void xls(final JasperPrint print, final OutputStream output) throws JRException {
+	private static void xls(final JasperPrint print, final OutputStream output) throws JRException {
 		JRXlsExporter exporter = new JRXlsExporter();
 
 		exporter.setExporterInput(new SimpleExporterInput(print));
 		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(output));
 		SimpleXlsReportConfiguration configuration = new SimpleXlsReportConfiguration();
 		configuration.setOnePagePerSheet(false);
+		configuration.setDetectCellType(true);
+		configuration.setCollapseRowSpan(false);
+		configuration.setIgnoreCellBackground(true);
+		configuration.setWhitePageBackground(false);
+		configuration.setAutoFitPageHeight(true);
+		configuration.setRemoveEmptySpaceBetweenRows(true);
+		exporter.setConfiguration(configuration);
+		exporter.exportReport();
+	}
+
+	/**
+	 * @param print
+	 * @throws JRException
+	 */
+	private static void xlsx(final JasperPrint print, final OutputStream output) throws JRException {
+
+		JRXlsxExporter exporter = new JRXlsxExporter();
+
+		exporter.setExporterInput(new SimpleExporterInput(print));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(output));
+		SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+		configuration.setOnePagePerSheet(true);
+		configuration.setDetectCellType(true);
+		configuration.setCollapseRowSpan(false);
+		configuration.setIgnoreCellBackground(true);
+		configuration.setWhitePageBackground(false);
+		configuration.setAutoFitPageHeight(true);
+		configuration.setRemoveEmptySpaceBetweenRows(true);
 		exporter.setConfiguration(configuration);
 		exporter.exportReport();
 	}

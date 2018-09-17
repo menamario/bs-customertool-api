@@ -39,8 +39,7 @@ public class CheckboxCell<T> extends CheckBoxTableCell<T, Boolean> {
 		checkBox.setDisable(true);
 	}
 
-	public void commitEdit(Boolean value) {
-		System.out.println("HOLA");
+	public void commitEdit(Boolean value) {		
 		super.commitEdit(value);
 		checkBox.setDisable(true);
 	}

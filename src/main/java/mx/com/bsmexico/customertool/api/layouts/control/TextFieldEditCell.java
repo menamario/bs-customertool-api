@@ -156,7 +156,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 
 			@Override
 			public void handle(ActionEvent event) {
-				System.out.println("hi");
+				//nothing
 			}
 		});
 
