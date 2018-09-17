@@ -32,7 +32,9 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 	public <T> TableColumn<S, T> getColumn(String fieldName, int width) throws Exception {
 		final TableColumn<S, T> column = new TableColumn<>();
 		Label firstNameLabel = new Label(metamodel.getTitle(fieldName));
-		firstNameLabel.setTooltip(new Tooltip(metamodel.getValidator().getValidationDescription(fieldName)));
+		Tooltip tt = new Tooltip(metamodel.getValidator().getValidationDescription(fieldName));
+		tt.setStyle("-fx-text-fill: black;-fx-background-color: lightgray;-fx-font-family: FranklinGothicLT;-fx-font-size: 12px;");
+		firstNameLabel.setTooltip(tt);
 		column.setGraphic(firstNameLabel);
 		column.setId(fieldName);
 		column.setVisible(!metamodel.isHidden(fieldName));

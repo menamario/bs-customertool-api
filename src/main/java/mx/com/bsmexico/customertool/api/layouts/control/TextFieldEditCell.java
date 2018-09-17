@@ -248,7 +248,9 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 				final S registro = (S) this.getTableRow().getItem();
 				if (validator.isActive(registro) && !validator.isValidField(fieldName, registro)) {
 					this.getStyleClass().add("invalid");
-					this.setTooltip(new Tooltip(validator.getValidationDescription(fieldName)));
+					Tooltip tt = new Tooltip(validator.getValidationDescription(fieldName));
+					tt.setStyle("-fx-text-fill: black;-fx-background-color: lightgray;-fx-font-family: FranklinGothicLT;-fx-font-size: 12px;");
+					this.setTooltip(tt);
 				}
 			}
 		}		
