@@ -14,9 +14,9 @@ import mx.com.bsmexico.layoutstool.test.api.misc.Beneficiario;
 public class ImporterTest {
 
 	@Test
-	public void exporterTest() {
+	public void importerTest() {
 		final ClassLoader classLoader = getClass().getClassLoader();
-		final File file = new File(classLoader.getResource("plain/Libro6.csv").getFile());
+		final File file = new File(classLoader.getResource("plain/Libro6.xls").getFile());
 
 		final ImportTarget<Beneficiario> target = new ImportTarget<Beneficiario>() {
 
