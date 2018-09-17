@@ -2,6 +2,9 @@ package mx.com.bsmexico.customertool.api.layouts.control;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
@@ -72,6 +75,8 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
 			
 			if(pos!=null && event.getCode()==KeyCode.DELETE){
+				ObservableValue observableValue = this.getColumns().get(pos.getColumn()).getCellObservableValue(pos.getRow());
+				((StringProperty)observableValue).set("");
              //TODO implementar este pedo
 			}else if(pos!=null && event.getCode()==KeyCode.C && event.isControlDown()){
 				 final Clipboard clipboard = Clipboard.getSystemClipboard();
@@ -80,11 +85,8 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 			     clipboard.setContent(content);
 			}else if (pos!=null && event.getCode()==KeyCode.V && event.isControlDown()){
 				final Clipboard clipboard = Clipboard.getSystemClipboard();
-				final ClipboardContent content = new ClipboardContent();
-				String cb = clipboard.getString();
-				content.put(DataFormat.HTML, cb);
-				clipboard.setContent(content);
-				table.edit(pos.getRow(), pos.getTableColumn());
+				ObservableValue observableValue = this.getColumns().get(pos.getColumn()).getCellObservableValue(pos.getRow());
+				((StringProperty)observableValue).set(clipboard.getString());
 			}else if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
 				final Clipboard clipboard = Clipboard.getSystemClipboard();
 				final ClipboardContent content = new ClipboardContent();

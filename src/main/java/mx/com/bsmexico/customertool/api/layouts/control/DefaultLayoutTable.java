@@ -2,7 +2,15 @@ package mx.com.bsmexico.customertool.api.layouts.control;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 /**
  * @author jchr
@@ -39,11 +47,11 @@ public abstract class DefaultLayoutTable<T> extends LayoutTable<T> {
 	 */
 	protected void init() throws InstantiationError {
 		try {
-			//this.table = new TableView<T>();
+			// this.table = new TableView<T>();
 			setColumns();
 			polulate();
 			setItems(data);
-			//getChildren().add(this.table);
+			// getChildren().add(this.table);
 			getSelectionModel().setCellSelectionEnabled(true);
 			setTableEditable();
 		} catch (Exception exception) {
@@ -57,6 +65,16 @@ public abstract class DefaultLayoutTable<T> extends LayoutTable<T> {
 	 */
 	private void setTableEditable() {
 		setEditable(true);
+		setOnKeyPressed(event -> {
+			TablePosition<T, ?> pos = getFocusModel().getFocusedCell();
+
+			if (pos != null && event.getCode() == KeyCode.C && event.isControlDown()) {
+				final Clipboard clipboard = Clipboard.getSystemClipboard();
+				final ClipboardContent content = new ClipboardContent();
+				content.putString(pos.getTableColumn().getCellData(pos.getRow()).toString());
+				clipboard.setContent(content);
+			}
+		});
 	}
 
 	/**

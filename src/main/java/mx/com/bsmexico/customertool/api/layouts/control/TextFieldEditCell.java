@@ -289,13 +289,8 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 		setGraphic(textField);
 		
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
-		String cbHtml = clipboard.getHtml();
 		String cbUrl = clipboard.getUrl();
-		if(cbHtml!=null){
-			textField.setText(cbHtml);
-			clipboard.clear();
-			textField.selectAll();
-		}else if(cbUrl!=null){
+		if(cbUrl!=null){
 			textField.setText(cbUrl);
 			textField.forward();
 			clipboard.clear();
