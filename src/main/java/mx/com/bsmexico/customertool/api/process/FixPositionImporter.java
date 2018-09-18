@@ -19,6 +19,7 @@ import org.mozilla.universalchardet.UniversalDetector;
 public abstract class FixPositionImporter<T> implements Importer<T> {
 	private ImportTarget<T> target;
 	private boolean trim;
+	private static final String UTF8_BOM = "\uFEFF";
 
 	public FixPositionImporter(final ImportTarget<T> target) throws IllegalArgumentException {
 		if (target == null) {
@@ -45,7 +46,6 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 		try {
 			strTipoCod = this.detectarCodificacion(file);
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (strTipoCod == null) {
@@ -56,7 +56,7 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 			T instance = null;
 			String line = reader.readLine();
 			while (line != null) {
-				instance = this.getInstance(getRecord(line, positions));
+				instance = this.getInstance(getRecord(removeUTFBOM(line), positions));
 				if (instance != null) {
 					data.add(instance);
 				}
@@ -106,6 +106,7 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 				value = StringUtils.substring(line, start, end);
 			}
 		}
+		// System.out.println("start:"+start+",end:"+end+",value:"+value);
 		return (trim) ? value.trim() : value;
 	}
 
@@ -146,6 +147,18 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 					+ "- Método(" + new Exception().getStackTrace()[0].getMethodName() + ") \n" + e);
 		}
 		return encoding;
+	}
+
+	/**
+	 * @param s
+	 * @return
+	 */
+	private String removeUTFBOM(final String input) {
+		String result = input;
+		if (input.startsWith(UTF8_BOM)) {
+			result = input.substring(1);
+		}
+		return result;
 	}
 
 }
