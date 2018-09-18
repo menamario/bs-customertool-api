@@ -3,12 +3,14 @@ package mx.com.bsmexico.customertool.api.process;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mozilla.universalchardet.UniversalDetector;
 
 /**
  * @author jchr
@@ -39,8 +41,21 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 		}
 		List<T> data = new ArrayList<>();
 		final List<RecordPosition> positions = this.getFixPositions();
+		
+		String strTipoCod=null;
+        try {
+			strTipoCod=this.detectarCodificacion(file);
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        if (strTipoCod==null){
+            strTipoCod="ISO-8859-1";
+        }
+		
+		
 		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")))) {
+				new InputStreamReader(new FileInputStream(file), strTipoCod))) {
 			T instance = null;
 			String line = reader.readLine();
 			while (line != null) {
@@ -108,4 +123,29 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 	 * @return
 	 */
 	protected abstract List<RecordPosition> getFixPositions();
+	
+	public String detectarCodificacion(File strRutaArchivoP) throws Throwable{
+        byte[] buf;
+        java.io.FileInputStream fis;
+        UniversalDetector detector;
+        int nread;
+        String encoding=null;
+        try{    
+            buf= new byte[4096];
+            fis = new java.io.FileInputStream(strRutaArchivoP);
+            detector = new UniversalDetector(null);
+            while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+              detector.handleData(buf, 0, nread);
+            }
+            detector.dataEnd();
+            encoding = detector.getDetectedCharset();
+            detector.reset();
+            return encoding;
+        }catch (IOException e) {
+            System.out.println("Error en - Clase(" + new Exception().getStackTrace()[0].getClassName() + ") "
+                      + "- Método(" + new Exception().getStackTrace()[0].getMethodName() + ") \n" + e);
+        }
+		return encoding;
+}
+	
 }
