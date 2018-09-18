@@ -2,15 +2,11 @@ package mx.com.bsmexico.customertool.api.layouts.control;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 /**
  * @author jchr

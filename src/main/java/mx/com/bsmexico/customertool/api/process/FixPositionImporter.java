@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,21 +40,19 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 		}
 		List<T> data = new ArrayList<>();
 		final List<RecordPosition> positions = this.getFixPositions();
-		
-		String strTipoCod=null;
-        try {
-			strTipoCod=this.detectarCodificacion(file);
+
+		String strTipoCod = null;
+		try {
+			strTipoCod = this.detectarCodificacion(file);
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        if (strTipoCod==null){
-            strTipoCod="ISO-8859-1";
-        }
-		
-		
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(file), strTipoCod))) {
+		if (strTipoCod == null) {
+			strTipoCod = "ISO-8859-1";
+		}
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), strTipoCod))) {
 			T instance = null;
 			String line = reader.readLine();
 			while (line != null) {
@@ -103,7 +100,7 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 	 */
 	private String extractValue(final int start, final int end, final String line, final boolean trim) {
 		String value = StringUtils.EMPTY;
-		if (StringUtils.isNotBlank(line)) {			
+		if (StringUtils.isNotBlank(line)) {
 			final int limit = line.length();
 			if (start >= 0 && start < limit && end > start && end <= limit) {
 				value = StringUtils.substring(line, start, end);
@@ -123,29 +120,32 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 	 * @return
 	 */
 	protected abstract List<RecordPosition> getFixPositions();
-	
-	public String detectarCodificacion(File strRutaArchivoP) throws Throwable{
-        byte[] buf;
-        java.io.FileInputStream fis;
-        UniversalDetector detector;
-        int nread;
-        String encoding=null;
-        try{    
-            buf= new byte[4096];
-            fis = new java.io.FileInputStream(strRutaArchivoP);
-            detector = new UniversalDetector(null);
-            while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
-              detector.handleData(buf, 0, nread);
-            }
-            detector.dataEnd();
-            encoding = detector.getDetectedCharset();
-            detector.reset();
-            return encoding;
-        }catch (IOException e) {
-            System.out.println("Error en - Clase(" + new Exception().getStackTrace()[0].getClassName() + ") "
-                      + "- Método(" + new Exception().getStackTrace()[0].getMethodName() + ") \n" + e);
-        }
+
+	/**
+	 * @param strRutaArchivoP
+	 * @return
+	 * @throws Throwable
+	 */
+	public String detectarCodificacion(File strRutaArchivoP) throws Throwable {
+		byte[] buf;
+		UniversalDetector detector;
+		int nread;
+		String encoding = null;
+		try (java.io.FileInputStream fis = new java.io.FileInputStream(strRutaArchivoP)) {
+			buf = new byte[4096];
+			detector = new UniversalDetector(null);
+			while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+				detector.handleData(buf, 0, nread);
+			}
+			detector.dataEnd();
+			encoding = detector.getDetectedCharset();
+			detector.reset();
+			return encoding;
+		} catch (IOException e) {
+			System.out.println("Error en - Clase(" + new Exception().getStackTrace()[0].getClassName() + ") "
+					+ "- Método(" + new Exception().getStackTrace()[0].getMethodName() + ") \n" + e);
+		}
 		return encoding;
-}
-	
+	}
+
 }
