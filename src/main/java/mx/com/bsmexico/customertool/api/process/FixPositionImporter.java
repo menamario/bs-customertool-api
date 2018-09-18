@@ -89,7 +89,7 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 	private String extractValue(final int start, final int end, final String line, final boolean trim) {
 		String value = StringUtils.EMPTY;
 		if (StringUtils.isNotBlank(line)) {			
-			final int limit = line.length() - 1;			
+			final int limit = line.length();
 			if (start >= 0 && start < limit && end > start && end <= limit) {
 				value = StringUtils.substring(line, start, end);
 			}
