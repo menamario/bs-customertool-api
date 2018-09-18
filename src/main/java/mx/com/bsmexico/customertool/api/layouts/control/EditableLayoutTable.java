@@ -2,9 +2,12 @@ package mx.com.bsmexico.customertool.api.layouts.control;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
@@ -13,6 +16,8 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 /**
  * @author jchr
@@ -20,6 +25,7 @@ import javafx.scene.input.KeyEvent;
  * @param <T>
  */
 public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
+	T copiedRow = null;
 
 	protected EditableLayoutTable(Class<T> type) {
 		super(type, new EditableColumnTableFactory<>(type));
@@ -68,9 +74,66 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		setEditable(true);
 		// allows the individual cells to be selected
 		getSelectionModel().cellSelectionEnabledProperty().set(true);
+		final TableView<T> table = this;
+
+		
+		addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+			
+
+		    @Override
+		    public void handle(MouseEvent t) {
+		    	
+		    	TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
+		    	
+		    	
+				ContextMenu cm = new ContextMenu();
+				MenuItem removeItem = new MenuItem("Eliminar registro");
+				cm.getItems().add(removeItem);
+				MenuItem copyItem = new MenuItem("Copiar registro");
+				cm.getItems().add(copyItem);
+				MenuItem pasteItem = new MenuItem("Pegar registro");
+				cm.getItems().add(pasteItem);
+				
+				
+				removeItem.setOnAction(new EventHandler<ActionEvent>() {
+
+	                @Override
+	                public void handle(ActionEvent event) {
+	                    table.getItems().remove(pos.getRow());
+	                }
+	            });
+				
+				copyItem.setOnAction(new EventHandler<ActionEvent>() {
+
+	                @Override
+	                public void handle(ActionEvent event) {
+	                    copiedRow = table.getItems().get(pos.getRow());
+	                }
+	            });
+				
+				pasteItem.setOnAction(new EventHandler<ActionEvent>() {
+
+	                @Override
+	                public void handle(ActionEvent event) {
+	                	
+	                	table.getItems().set(pos.getRow(), copiedRow);
+	                }
+	            });
+
+				
+				
+		        if(t.getButton() == MouseButton.SECONDARY) {
+		        	pasteItem.setDisable(copiedRow==null);
+		            cm.show(table, t.getScreenX(), t.getScreenY());
+		        }
+		    }
+		});
+		
+		
+		
 		// when character or numbers pressed it will start edit in editable
 		// fields
-		final TableView table = this;
+		
 		setOnKeyPressed(event -> {
 			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
 			

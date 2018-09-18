@@ -7,7 +7,7 @@ package mx.com.bsmexico.customertool.api;
  * @author jchr
  *
  */
-public abstract class Feature {
+public abstract class Feature implements Comparable<Feature> {
 	
 	private MenuNavigator menuNavigator;
 
@@ -28,7 +28,15 @@ public abstract class Feature {
 	
 	public abstract void launch();
 	
+	public abstract int getOrder();
+	
 	public Desktop getDesktop(){
 		return this.menuNavigator.getDesktop();
+	}
+	
+	public int compareTo(Feature o) {
+		if (this.getOrder()<o.getOrder()) return -1;
+		else if(this.getOrder()<o.getOrder()) return 1;
+		else return 0;
 	}
 }
