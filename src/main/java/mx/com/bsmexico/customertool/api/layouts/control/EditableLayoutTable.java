@@ -1,5 +1,8 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javafx.beans.property.StringProperty;
@@ -75,6 +78,14 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		// allows the individual cells to be selected
 		getSelectionModel().cellSelectionEnabledProperty().set(true);
 		final TableView<T> table = this;
+		
+		ContextMenu cm = new ContextMenu();
+		MenuItem removeItem = new MenuItem("Eliminar registro");
+		cm.getItems().add(removeItem);
+		MenuItem copyItem = new MenuItem("Copiar registro");
+		cm.getItems().add(copyItem);
+		MenuItem pasteItem = new MenuItem("Pegar registro");
+		cm.getItems().add(pasteItem);
 
 		
 		addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -86,13 +97,9 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		    	TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
 		    	
 		    	
-				ContextMenu cm = new ContextMenu();
-				MenuItem removeItem = new MenuItem("Eliminar registro");
-				cm.getItems().add(removeItem);
-				MenuItem copyItem = new MenuItem("Copiar registro");
-				cm.getItems().add(copyItem);
-				MenuItem pasteItem = new MenuItem("Pegar registro");
-				cm.getItems().add(pasteItem);
+				
+				
+				cm.setHideOnEscape(true);
 				
 				
 				removeItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -115,8 +122,19 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 
 	                @Override
 	                public void handle(ActionEvent event) {
+	                	T another;
+						try {
+							another = type.newInstance();
+							BeanUtils.copyProperties(another, copiedRow);
+		                	table.getItems().set(pos.getRow(), another);
+						} catch (InstantiationException | IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 	                	
-	                	table.getItems().set(pos.getRow(), copiedRow);
 	                }
 	            });
 
