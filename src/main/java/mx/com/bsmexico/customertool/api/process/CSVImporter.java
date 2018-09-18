@@ -3,6 +3,7 @@ package mx.com.bsmexico.customertool.api.process;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -170,7 +171,10 @@ public abstract class CSVImporter<T> implements Importer<T> {
 	 */
 	private List<List<String>> getRecordsFromStandarCSV(final File file) throws Exception {
 		final List<List<String>> records = new ArrayList<>();
-		final BufferedReader reader = Files.newBufferedReader(Paths.get(file.getAbsolutePath()));
+
+        final BufferedReader reader = new BufferedReader(
+           new InputStreamReader(new FileInputStream(file), "UTF-8"));
+		
 		final String[] headers = getHeader();
 		CSVFormat format = CSVFormat.DEFAULT;
 		if (headers != null) {
