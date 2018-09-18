@@ -186,6 +186,12 @@ public class NavigationTest {
 			public void launch() {
 			}
 
+			@Override
+			public int getOrder() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
 		});
 
 		cpms.add(new Feature() {
@@ -199,6 +205,12 @@ public class NavigationTest {
 
 			@Override
 			public void launch() {
+			}
+
+			@Override
+			public int getOrder() {
+				// TODO Auto-generated method stub
+				return 0;
 			}
 
 		});
@@ -215,6 +227,12 @@ public class NavigationTest {
 			@Override
 			public void launch() {
 
+			}
+
+			@Override
+			public int getOrder() {
+				// TODO Auto-generated method stub
+				return 0;
 			}
 
 		});
