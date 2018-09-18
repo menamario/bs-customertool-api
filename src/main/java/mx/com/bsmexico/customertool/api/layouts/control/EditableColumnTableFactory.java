@@ -50,7 +50,7 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 				cell.setValidator(validator);
 				if (metamodel.isDisabled(fieldName)) {
 					cell.setDisable(true);
-					cell.setStyle("-fx-background-color: lightgray;");
+					cell.setStyle("-fx-background-color: rgba(204,204,204,0.5) !important;");
 				}
 				if (!metamodel.isEditable(fieldName)) {
 					cell.setEditable(false);

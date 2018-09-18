@@ -31,6 +31,7 @@ public abstract class LayoutTable<T> extends TableView<T> {
 		}
 		this.columnFactory = columnFactory;
 		metamodel = new LayoutMetaModel<T>(type);
+		this.type = type;
 	}
 		
 
