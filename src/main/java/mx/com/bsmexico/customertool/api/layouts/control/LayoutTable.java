@@ -1,7 +1,12 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import mx.com.bsmexico.customertool.api.layouts.model.LayoutMetaModel;
 
@@ -42,6 +47,23 @@ public abstract class LayoutTable<T> extends TableView<T> {
 		return validated;
 	}
 
+	
+	/**
+	 * Search a column of the table by Id
+	 * @param id
+	 * @return
+	 */
+	protected TableColumn<T, ?> getColumn(final String id) {
+		TableColumn<T, ?> column = null;
+		if (StringUtils.isNotBlank(id)) {
+			final Optional<TableColumn<T, ?>> result = this.getColumns().stream().filter(c -> id.equals(c.getId()))
+					.findFirst();
+			if (result.isPresent()) {
+				column = result.get();
+			}
+		}
+		return column;
+	}
 
 	/**
 	 * 
