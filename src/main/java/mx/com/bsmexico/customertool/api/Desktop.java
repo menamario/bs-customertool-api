@@ -57,5 +57,13 @@ public abstract class Desktop extends Region {
 	public Stage getStage() {
 		return this.stage;
 	}
+	
+	public void opacar(){
+		this.stage.setOpacity(0.8);
+	}
+	
+	public void desOpacar(){
+		this.stage.setOpacity(1);
+	}
 
 }
