@@ -6,20 +6,23 @@ import org.apache.commons.lang3.StringUtils;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 import mx.com.bsmexico.customertool.api.layouts.model.LayoutMetaModel;
 
 /**
  * @author jchr
  *
  */
-public abstract class LayoutTable<T> extends TableView<T> {	
+public abstract class LayoutTable<T> extends TableView<T> {
 	protected ColumnTableFactoryAbstract<T> columnFactory;
 	protected final ObservableList<T> data = FXCollections.observableArrayList();
 	protected LayoutMetaModel<T> metamodel;
 	protected Class<T> type;
 	protected boolean validated = false;
+	protected boolean hasIndexColumn;
 
 	/**
 	 * @param layoutFactory
@@ -38,7 +41,6 @@ public abstract class LayoutTable<T> extends TableView<T> {
 		metamodel = new LayoutMetaModel<T>(type);
 		this.type = type;
 	}
-		
 
 	/**
 	 * @return the inEvaluation
@@ -47,9 +49,9 @@ public abstract class LayoutTable<T> extends TableView<T> {
 		return validated;
 	}
 
-	
 	/**
 	 * Search a column of the table by Id
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -66,19 +68,56 @@ public abstract class LayoutTable<T> extends TableView<T> {
 	}
 
 	/**
+	 * Set de index column
+	 */
+	protected void setIndexColumn() {
+		TableColumn<T, String> indexColumn = new TableColumn<>();
+		indexColumn.setText("#");		
+		indexColumn.setCellFactory(new Callback<TableColumn<T, String>, TableCell<T, String>>() {
+			@Override
+			public TableCell<T, String> call(TableColumn<T, String> param) {
+				return new TableCell<T, String>() {
+					@Override
+					protected void updateItem(String item, boolean empty) {
+						super.updateItem(item, empty);
+
+						if (this.getTableRow() != null ) {
+							setText(this.getTableRow().getIndex() + "");
+						} else {
+							setText("");
+						}
+					}
+				};
+			}
+		});
+		this.getColumns().add(0, indexColumn);
+		hasIndexColumn = true;
+	}
+
+	
+	/**
+	 * 
+	 */
+	protected void removeIndexColumn() {
+		if(hasIndexColumn) {
+			this.getColumns().remove(0);
+		}
+	}
+
+	/**
 	 * 
 	 */
 	public abstract boolean validateTable() throws Exception;
-	
+
 	public abstract boolean validateModel(T model) throws Exception;
-	
+
 	public abstract boolean isActiveModel(T model) throws Exception;
 	/**
 	 * @return
 	 */
-	//public TableView<T> getTable() {
-		//return this.table;
-	//}
+	// public TableView<T> getTable() {
+	// return this.table;
+	// }
 
 	/**
 	 * @throws Exception
@@ -99,5 +138,5 @@ public abstract class LayoutTable<T> extends TableView<T> {
 	 * 
 	 */
 	protected abstract void addRow();
-	
+
 }
