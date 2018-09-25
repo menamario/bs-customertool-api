@@ -72,6 +72,8 @@ public abstract class LayoutTable<T> extends TableView<T> {
 	 */
 	protected void setIndexColumn() {
 		TableColumn<T, String> indexColumn = new TableColumn<>();
+		indexColumn.setPrefWidth(40);
+		indexColumn.setResizable(false);
 		indexColumn.setText("#");		
 		indexColumn.setCellFactory(new Callback<TableColumn<T, String>, TableCell<T, String>>() {
 			@Override
@@ -82,7 +84,7 @@ public abstract class LayoutTable<T> extends TableView<T> {
 						super.updateItem(item, empty);
 
 						if (this.getTableRow() != null ) {
-							setText(this.getTableRow().getIndex() + "");
+							setText(this.getTableRow().getIndex() + 1 + "");
 						} else {
 							setText("");
 						}

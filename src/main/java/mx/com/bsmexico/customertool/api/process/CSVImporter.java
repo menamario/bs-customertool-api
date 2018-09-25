@@ -3,6 +3,7 @@ package mx.com.bsmexico.customertool.api.process;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.mozilla.universalchardet.UniversalDetector;
 
 /**
  * @author jchr
@@ -169,9 +171,20 @@ public abstract class CSVImporter<T> implements Importer<T> {
 	 */
 	private List<List<String>> getRecordsFromStandarCSV(final File file) throws Exception {
 		final List<List<String>> records = new ArrayList<>();
+		
+
+		String strTipoCod = null;
+		try {
+			strTipoCod = this.detectarCodificacion(file);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		if (strTipoCod == null) {
+			strTipoCod = "ISO-8859-1";
+		}
 
         final BufferedReader reader = new BufferedReader(
-           new InputStreamReader(new FileInputStream(file), "UTF-8"));
+           new InputStreamReader(new FileInputStream(file), strTipoCod));
 		
 		final String[] headers = getHeader();
 		CSVFormat format = CSVFormat.DEFAULT;
@@ -197,6 +210,29 @@ public abstract class CSVImporter<T> implements Importer<T> {
 		}
 		return records;
 	}
+	
+	public String detectarCodificacion(File strRutaArchivoP) throws Throwable {
+		byte[] buf;
+		UniversalDetector detector;
+		int nread;
+		String encoding = null;
+		try (java.io.FileInputStream fis = new java.io.FileInputStream(strRutaArchivoP)) {
+			buf = new byte[4096];
+			detector = new UniversalDetector(null);
+			while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+				detector.handleData(buf, 0, nread);
+			}
+			detector.dataEnd();
+			encoding = detector.getDetectedCharset();
+			detector.reset();
+			return encoding;
+		} catch (IOException e) {
+			System.out.println("Error en - Clase(" + new Exception().getStackTrace()[0].getClassName() + ") "
+					+ "- Método(" + new Exception().getStackTrace()[0].getMethodName() + ") \n" + e);
+		}
+		return encoding;
+	}
+
 
 	/**
 	 * @param obj
