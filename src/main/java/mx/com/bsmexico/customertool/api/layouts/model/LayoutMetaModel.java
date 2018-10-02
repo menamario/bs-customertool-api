@@ -33,6 +33,7 @@ public class LayoutMetaModel<T> {
 	private Class<T> model;
 	private Map<String, Map<String, Object>> metamodel;
 	private LayoutModelValidator<?> validator;
+	private int fieldCount;
 
 	/**
 	 * @param model
@@ -44,7 +45,9 @@ public class LayoutMetaModel<T> {
 		}
 		this.model = model;
 		metamodel = new HashMap<>();
+		fieldCount = 0;
 		init();
+		
 	}
 
 	/**
@@ -77,6 +80,7 @@ public class LayoutMetaModel<T> {
 				setMetadataConvertClass(field, name);
 			}
 		}
+		this.fieldCount = metamodel.size();
 	}
 
 	/**
@@ -113,8 +117,8 @@ public class LayoutMetaModel<T> {
 	/**
 	 * @return
 	 */
-	public int getTotalFields() {
-		return (this.metamodel == null) ? 0 : this.metamodel.size();
+	public int getFieldCount() {
+		return this.fieldCount;
 	}
 
 	/**

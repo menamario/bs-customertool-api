@@ -106,7 +106,6 @@ public abstract class FixPositionImporter<T> implements Importer<T> {
 				value = StringUtils.substring(line, start, end);
 			}
 		}
-		// System.out.println("start:"+start+",end:"+end+",value:"+value);
 		return (trim) ? value.trim() : value;
 	}
 
