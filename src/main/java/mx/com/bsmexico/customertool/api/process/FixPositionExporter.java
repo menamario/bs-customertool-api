@@ -32,14 +32,19 @@ public abstract class FixPositionExporter<T> implements Exporter<T> {
 		final List<T> data = source.getData();
 		final BufferedWriter writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
 		if (data != null) {
+			boolean datos = false;
 			for(T elem : data) {
+				if (datos){
+					writer.newLine();
+				}
 				final List<RecordPosition> record = this.getRecord(elem);
 				String line = StringUtils.EMPTY;
 				for(RecordPosition pos : record) {
 					line = this.placeValue(pos.getStart(), pos.getEnd(),pos.getValue(), line);
 				}
+				line=line.substring(0,line.length()-1);
 				writer.write(line);
-				writer.newLine();
+				datos=true;
 			}			
 		}
 		writer.flush();

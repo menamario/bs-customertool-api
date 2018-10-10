@@ -1,11 +1,16 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.AccessibleAttribute;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -74,20 +79,32 @@ public abstract class LayoutTable<T> extends TableView<T> {
 		TableColumn<T, String> indexColumn = new TableColumn<>();
 		indexColumn.setPrefWidth(40);
 		indexColumn.setResizable(false);
-		indexColumn.setText("#");		
+		indexColumn.setEditable(false);
+		indexColumn.setText("#");
+		indexColumn.setStyle("-fx-padding: 0; -fx-border-insets:0;");
+		indexColumn.impl_setReorderable(false);
 		indexColumn.setCellFactory(new Callback<TableColumn<T, String>, TableCell<T, String>>() {
 			@Override
-			public TableCell<T, String> call(TableColumn<T, String> param) {
-				return new TableCell<T, String>() {
+			public LockedTableCell<T, String> call(TableColumn<T, String> param) {
+				return new LockedTableCell<T, String>() {
 					@Override
 					protected void updateItem(String item, boolean empty) {
 						super.updateItem(item, empty);
+						this.setStyle("-fx-background-color: lightgray; -fx-padding: 0; -fx-border-insets:0;");
 
-						if (this.getTableRow() != null ) {
+						if (this.getTableRow() != null) {
 							setText(this.getTableRow().getIndex() + 1 + "");
 						} else {
 							setText("");
 						}
+
+						Platform.runLater(() -> {
+							ScrollBar sc = (ScrollBar) getTableView()
+									.queryAccessibleAttribute(AccessibleAttribute.HORIZONTAL_SCROLLBAR);
+							double sv = sc.getValue();
+							this.setTranslateX(sv);
+							this.toFront();
+						});
 					}
 				};
 			}
@@ -96,12 +113,11 @@ public abstract class LayoutTable<T> extends TableView<T> {
 		hasIndexColumn = true;
 	}
 
-	
 	/**
 	 * 
 	 */
 	protected void removeIndexColumn() {
-		if(hasIndexColumn) {
+		if (hasIndexColumn) {
 			this.getColumns().remove(0);
 		}
 	}
@@ -114,12 +130,6 @@ public abstract class LayoutTable<T> extends TableView<T> {
 	public abstract boolean validateModel(T model) throws Exception;
 
 	public abstract boolean isActiveModel(T model) throws Exception;
-	/**
-	 * @return
-	 */
-	// public TableView<T> getTable() {
-	// return this.table;
-	// }
 
 	/**
 	 * @throws Exception

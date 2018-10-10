@@ -11,6 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -49,6 +50,10 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 				: metamodel.getConverter(fieldName);
 		final LayoutModelValidator<S> validator = (LayoutModelValidator<S>) metamodel.getValidator();
 		column.setPrefWidth(width);
+		if (!metamodel.isEditable(fieldName)) {
+			column.setEditable(false);
+		}
+		
 		final Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory = new Callback<TableColumn<S, T>, TableCell<S, T>>() {
 			public TableCell<S, T> call(TableColumn<S, T> p) {
 				final TextFieldEditCell<S, T> cell = new TextFieldEditCell<S, T>(fieldName, converter);
@@ -59,6 +64,7 @@ public class EditableColumnTableFactory<S> extends ColumnTableFactoryAbstract<S>
 				}
 				if (!metamodel.isEditable(fieldName)) {
 					cell.setEditable(false);
+					
 				}
 				cell.setmaxLength(metamodel.getLength(fieldName));
 				return cell;

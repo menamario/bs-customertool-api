@@ -31,6 +31,7 @@ public abstract class DefaultLayoutTable<T> extends LayoutTable<T> {
 			TableColumn ct = null;
 			for (String id : ids) {
 				ct = columnFactory.getColumn(id, 100);
+				ct.impl_setReorderable(false);
 				ct.prefWidthProperty().bind(widthProperty().multiply(0.15));
 				getColumns().add(ct);
 			}

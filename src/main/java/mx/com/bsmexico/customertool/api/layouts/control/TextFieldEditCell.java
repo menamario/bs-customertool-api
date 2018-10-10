@@ -1,5 +1,6 @@
 package mx.com.bsmexico.customertool.api.layouts.control;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -15,6 +16,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
 import mx.com.bsmexico.customertool.api.layouts.model.validation.LayoutModelValidator;
 
@@ -24,7 +26,7 @@ import mx.com.bsmexico.customertool.api.layouts.model.validation.LayoutModelVali
  * @param <S>
  * @param <T>
  */
-public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
+public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T> {
 
 	private TextField textField;
 	private boolean escapePressed = false;
@@ -48,6 +50,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 	public TextFieldEditCell(final String field, final StringConverter<T> converter) {
 		super(converter);
 		this.fieldName = field;
+
 	}
 
 	/*
@@ -71,6 +74,7 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 			final TableView<S> table = getTableView();
 			tablePos = table.getEditingCell();
 		}
+		((EditableLayoutTable) getTableView()).moveToCell(tablePos);
 	}
 
 	/** {@inheritDoc} */
@@ -112,6 +116,8 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 			this.commitEdit(getConverter().fromString(newText));
 		}
 		setGraphic(null); // stop editing with TextField
+		((EditableLayoutTable) getTableView()).moveToCell(tablePos);
+
 	}
 
 	/** {@inheritDoc} */
@@ -138,12 +144,6 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 	/**
 	 * 
 	 */
-	public void determinateInvalidStyle() {
-		this.getStyleClass().remove("invalid");
-		if (this.validationError) {
-			this.getStyleClass().add("invalid");
-		}
-	}
 
 	/**
 	 * @return
@@ -151,12 +151,13 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 	private TextField getTextField() {
 
 		final TextField textField = new TextField(getItemText());
+		textField.setStyle("-fx-border-width:0; -fx-padding:0");
 
 		textField.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent event) {
-				//nothing
+				// nothing
 			}
 		});
 
@@ -199,16 +200,26 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 				event.consume();
 				getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(), KeyEvent.KEY_PRESSED, "", "",
 						KeyCode.TAB, false, false, false, false));
+				((EditableLayoutTable) getTableView()).moveToCell(tablePos);
+			} else if (/* event.getCode() == KeyCode.RIGHT || */ event.getCode() == KeyCode.ENTER) {
+				event.consume();
+				Platform.runLater(() -> {
+					getTableView().getSelectionModel().selectBelowCell();
+				});
+
 			} /*
 				 * else if (event.getCode() == KeyCode.LEFT) { event.consume();
-				 * getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(),
-				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false)); }
-				 * else if (event.getCode() == KeyCode.UP) { event.consume();
-				 * getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(),
-				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false)); }
-				 * else if (event.getCode() == KeyCode.DOWN) { event.consume();
-				 * getTableView().fireEvent(new KeyEvent(getTableView(), getTableView(),
-				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false, false, false, false)); }
+				 * getTableView().fireEvent(new KeyEvent(getTableView(),
+				 * getTableView(), KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT,
+				 * false, false, false, false)); } else if (event.getCode() ==
+				 * KeyCode.UP) { event.consume(); getTableView().fireEvent(new
+				 * KeyEvent(getTableView(), getTableView(),
+				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false,
+				 * false, false)); } else if (event.getCode() == KeyCode.DOWN) {
+				 * event.consume(); getTableView().fireEvent(new
+				 * KeyEvent(getTableView(), getTableView(),
+				 * KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false, false,
+				 * false, false)); }
 				 */
 		});
 
@@ -238,22 +249,23 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 
 	@SuppressWarnings("unchecked")
 	private void executeValidation() {
-		if(this.getTableView() instanceof LayoutTable) {
-			if(((LayoutTable<S>) this.getTableView()).isValidated() && isEditable()) {
+		if (this.getTableView() instanceof LayoutTable) {
+			if (((LayoutTable<S>) this.getTableView()).isValidated() && isEditable()) {
 				this.getStyleClass().remove("invalid");
-				if(this.getTooltip() != null) {
-					this.setTooltip(null);			
+				if (this.getTooltip() != null) {
+					this.setTooltip(null);
 				}
-				
+
 				final S registro = (S) this.getTableRow().getItem();
 				if (validator.isActive(registro) && !validator.isValidField(fieldName, registro)) {
 					this.getStyleClass().add("invalid");
 					Tooltip tt = new Tooltip(validator.getValidationDescription(fieldName));
-					tt.setStyle("-fx-text-fill: black;-fx-background-color: lightgray;-fx-font-family: FranklinGothicLT;-fx-font-size: 12px;");
+					tt.setStyle(
+							"-fx-text-fill: black;-fx-background-color: lightgray;-fx-font-family: FranklinGothicLT;-fx-font-size: 12px;");
 					this.setTooltip(tt);
 				}
 			}
-		}		
+		}
 	}
 
 	/**
@@ -274,8 +286,10 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 			} else {
 				setText(getItemText());
 				setGraphic(null);
+				this.toBack();
 			}
 		}
+
 	}
 
 	/**
@@ -287,22 +301,27 @@ public class TextFieldEditCell<S, T> extends TextFieldTableCell<S, T>{
 		}
 		setText(null);
 		setGraphic(textField);
-		
+
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
 		String cbUrl = clipboard.getUrl();
-		if(cbUrl!=null){
-			textField.setText(cbUrl);
-			textField.forward();
-			clipboard.clear();
-		}else{
+		if (cbUrl != null && cbUrl.startsWith("layouts")) {
+			Platform.runLater(() -> {
+				textField.setText(cbUrl.substring(7));
+				clipboard.clear();
+				textField.requestFocus();
+				textField.end();
+				
+			});
+		} else {
 			textField.selectAll();
+			Platform.runLater(() -> {
+				textField.requestFocus();
+			});
 		}
-		
-		
-		
+
 		// requesting focus so that key input can immediately go into the
 		// TextField
-		textField.requestFocus();
+
 	}
 
 }

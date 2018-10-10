@@ -5,12 +5,16 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
+import javafx.scene.AccessibleAttribute;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
@@ -46,6 +50,7 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 			TableColumn ct = null;
 			for (String id : ids) {
 				ct = columnFactory.<String>getColumn(id, 100);
+				ct.impl_setReorderable(false);
 				ct.prefWidthProperty().bind(widthProperty().multiply(0.15));
 				getColumns().add(ct);
 			}
@@ -58,11 +63,11 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 	 */
 	protected void init() throws InstantiationError {
 		try {
-			//this.table = new TableView<T>();
+			// this.table = new TableView<T>();
 			setColumns();
 			polulate();
 			setItems(data);
-			//getChildren().add(this.table);
+			// getChildren().add(this.table);
 			getSelectionModel().setCellSelectionEnabled(true);
 			setTableEditable();
 			setStyle("-fx-selection-cell: red; -fx-selection-bar-non-focused: salmon;");
@@ -72,14 +77,44 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		}
 	}
 
+	public void moveToCell(TablePosition pos) {
+		final TableView<T> table = this;
+		Bounds bCell = pos.getTableColumn().getGraphic()
+				.localToScene(pos.getTableColumn().getGraphic().getBoundsInLocal());
+		Bounds bTable = table.localToScene(table.getBoundsInLocal());
+		ScrollBar sc = (ScrollBar) table.queryAccessibleAttribute(AccessibleAttribute.HORIZONTAL_SCROLLBAR);
+		double sv = sc.getValue();
+		double dif = bCell.getMinX() - bTable.getMinX();
+		if (dif < 46) {
+			double restar = 46 - dif;
+			sv -= restar;
+			sc.setValue(sv);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private void setTableEditable() {
+		ContextMenu cm = new ContextMenu();
 		setEditable(true);
 		// allows the individual cells to be selected
 		getSelectionModel().cellSelectionEnabledProperty().set(true);
 		final TableView<T> table = this;
-		
-		ContextMenu cm = new ContextMenu();
+
+		table.getFocusModel().focusedCellProperty().addListener((obs, oldSelection, newSelection) -> {
+
+			if (newSelection != null && oldSelection.getColumn() != 0) {
+				Platform.runLater(() -> {
+					cm.hide();
+					if (newSelection != null && newSelection.getTableColumn() != null
+							&& newSelection.getTableColumn().getGraphic() != null) {
+						moveToCell(newSelection);
+					} else if (newSelection.getColumn() == 0) {
+						table.getSelectionModel().selectRightCell();
+					}
+				});
+			}
+		});
+
 		MenuItem removeItem = new MenuItem("Eliminar registro");
 		cm.getItems().add(removeItem);
 		MenuItem copyItem = new MenuItem("Copiar registro");
@@ -87,46 +122,41 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 		MenuItem pasteItem = new MenuItem("Pegar registro");
 		cm.getItems().add(pasteItem);
 
-		
 		addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-			
 
-		    @Override
-		    public void handle(MouseEvent t) {
-		    	
-		    	TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
-		    	
-		    	
-				
-				
+			@Override
+			public void handle(MouseEvent t) {
+
+				TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
+
 				cm.setHideOnEscape(true);
-				
-				
+
 				removeItem.setOnAction(new EventHandler<ActionEvent>() {
 
-	                @Override
-	                public void handle(ActionEvent event) {
-	                    table.getItems().remove(pos.getRow());
-	                }
-	            });
-				
+					@Override
+					public void handle(ActionEvent event) {
+						table.getItems().remove(pos.getRow());
+					}
+				});
+
 				copyItem.setOnAction(new EventHandler<ActionEvent>() {
 
-	                @Override
-	                public void handle(ActionEvent event) {
-	                    copiedRow = table.getItems().get(pos.getRow());
-	                }
-	            });
-				
+					@Override
+					public void handle(ActionEvent event) {
+						copiedRow = table.getItems().get(pos.getRow());
+					}
+				});
+
 				pasteItem.setOnAction(new EventHandler<ActionEvent>() {
 
-	                @Override
-	                public void handle(ActionEvent event) {
-	                	T another;
+					@Override
+					public void handle(ActionEvent event) {
+						T another;
 						try {
 							another = type.newInstance();
 							BeanUtils.copyProperties(another, copiedRow);
-		                	table.getItems().set(pos.getRow(), another);
+							table.getItems().set(pos.getRow(), another);
+							table.getSelectionModel().select(pos.getRow(), pos.getTableColumn());
 						} catch (InstantiationException | IllegalAccessException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -134,49 +164,52 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-	                	
-	                }
-	            });
 
-				
-				
-		        if(t.getButton() == MouseButton.SECONDARY) {
-		        	pasteItem.setDisable(copiedRow==null);
-		            cm.show(table, t.getScreenX(), t.getScreenY());
-		        }
-		    }
+					}
+				});
+
+				if (t.getButton() == MouseButton.SECONDARY) {
+					pasteItem.setDisable(copiedRow == null);
+					cm.show(table, t.getScreenX(), t.getScreenY());
+				}
+			}
 		});
-		
-		
-		
+
 		// when character or numbers pressed it will start edit in editable
 		// fields
-		
+
 		setOnKeyPressed(event -> {
 			TablePosition<T, ?> pos = table.getFocusModel().getFocusedCell();
-			
-			if(pos!=null && event.getCode()==KeyCode.DELETE){
-				ObservableValue observableValue = this.getColumns().get(pos.getColumn()).getCellObservableValue(pos.getRow());
-				((StringProperty)observableValue).set("");
-             //TODO implementar este pedo
-			}else if(pos!=null && event.getCode()==KeyCode.C && event.isControlDown()){
-				 final Clipboard clipboard = Clipboard.getSystemClipboard();
-			     final ClipboardContent content = new ClipboardContent();
-			     content.putString(pos.getTableColumn().getCellData(pos.getRow()).toString());
-			     clipboard.setContent(content);
-			}else if (pos!=null && event.getCode()==KeyCode.V && event.isControlDown()){
-				final Clipboard clipboard = Clipboard.getSystemClipboard();
-				ObservableValue observableValue = this.getColumns().get(pos.getColumn()).getCellObservableValue(pos.getRow());
-				((StringProperty)observableValue).set(clipboard.getString());
-			}else if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
-				final Clipboard clipboard = Clipboard.getSystemClipboard();
-				final ClipboardContent content = new ClipboardContent();
-				content.put(DataFormat.URL, event.getText());
-				clipboard.setContent(content);
-                table.edit(pos.getRow(), pos.getTableColumn());
+
+			if (pos.getTableColumn().isEditable()) {
+				if (pos != null && event.getCode() == KeyCode.DELETE) {
+					ObservableValue observableValue = this.getColumns().get(pos.getColumn())
+							.getCellObservableValue(pos.getRow());
+					((StringProperty) observableValue).set("");
+					// TODO implementar este pedo
+				} else if (pos != null && event.getCode() == KeyCode.C && event.isControlDown()) {
+					final Clipboard clipboard = Clipboard.getSystemClipboard();
+					final ClipboardContent content = new ClipboardContent();
+					content.putString(pos.getTableColumn().getCellData(pos.getRow()).toString());
+					clipboard.setContent(content);
+				} else if (pos != null && event.getCode() == KeyCode.V && event.isControlDown()) {
+					final Clipboard clipboard = Clipboard.getSystemClipboard();
+					ObservableValue observableValue = this.getColumns().get(pos.getColumn())
+							.getCellObservableValue(pos.getRow());
+					((StringProperty) observableValue).set(clipboard.getString());
+				} else if (pos != null && (event.getCode().isLetterKey() || event.getCode().isDigitKey())) {
+					final Clipboard clipboard = Clipboard.getSystemClipboard();
+					final ClipboardContent content = new ClipboardContent();
+					content.put(DataFormat.URL, "layouts" + event.getText());
+					clipboard.setContent(content);
+					moveToCell(pos);
+					table.edit(pos.getRow(), pos.getTableColumn());
+				}
 			}
+
 			if (event.getCode() == KeyCode.TAB) {
-				table.requestFocus();
+				moveToCell(pos);
+
 				if ((pos.getColumn() + 1) == table.getColumns().size()
 						&& (pos.getRow() + 1) == table.getItems().size()) {
 					addRow();
@@ -196,10 +229,14 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 					table.getSelectionModel().selectNext();
 					table.scrollToColumnIndex(0);
 				}
+				Platform.runLater(() -> {
+					table.requestFocus();
+				});
+
 			}
 		});
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -207,7 +244,5 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 	protected String[] getFieldOrder() {
 		return metamodel.getFieldNames().toArray(new String[0]);
 	}
-	
-	
 
 }
