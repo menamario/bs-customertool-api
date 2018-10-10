@@ -16,7 +16,7 @@ public class LayoutModelTest {
 		LayoutMetaModel<ModelTest> metamodel = new LayoutMetaModel<ModelTest>(ModelTest.class) {
 		};
 
-		Assert.assertTrue(metamodel.getTotalFields() == 3);
+		Assert.assertTrue(metamodel.getFieldCount() == 2);
 		// PROPERTY_1
 		Assert.assertTrue(metamodel.getClassFieldName(ModelTest.FIELD_PROPERTY_1).equals("property1"));
 		Assert.assertTrue(metamodel.getTitle(ModelTest.FIELD_PROPERTY_1).equals("Property_1"));
