@@ -108,7 +108,7 @@ public abstract class EditableLayoutTable<T> extends LayoutTable<T> {
 					if (newSelection != null && newSelection.getTableColumn() != null
 							&& newSelection.getTableColumn().getGraphic() != null) {
 						moveToCell(newSelection);
-					} else if (newSelection.getColumn() == 0) {
+					} else if (newSelection.getColumn() == 0 && oldSelection.getColumn()!=-1) {
 						table.getSelectionModel().selectRightCell();
 					}
 				});
